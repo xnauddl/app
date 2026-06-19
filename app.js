@@ -702,3 +702,63 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     console.log('Service Worker 등록 실패:', err);
   });
 }
+
+/* ---------- 영구 저장소 (데이터 보호) ---------- */
+const storageStatusEl = document.getElementById('storage-status');
+const persistBtn = document.getElementById('persist-btn');
+
+async function updateStorageStatus() {
+  if (!navigator.storage || !navigator.storage.persisted) {
+    storageStatusEl.innerHTML = '⚠️ 이 브라우저는 영구 저장소를 지원하지 않습니다.<br>주기적으로 백업 파일을 저장해 주세요.';
+    storageStatusEl.className = 'storage-status warn';
+    persistBtn.style.display = 'none';
+    return;
+  }
+  const persisted = await navigator.storage.persisted();
+  if (persisted) {
+    storageStatusEl.innerHTML = '✅ 데이터 영구 보존이 켜져 있습니다.<br>기록이 자동으로 삭제되지 않습니다.';
+    storageStatusEl.className = 'storage-status ok';
+    persistBtn.style.display = 'none';
+  } else {
+    storageStatusEl.innerHTML = '🔓 데이터 영구 보존이 꺼져 있습니다.<br>아래 버튼을 눌러 보호를 켜주세요.';
+    storageStatusEl.className = 'storage-status warn';
+    persistBtn.style.display = 'block';
+  }
+
+  // 저장 공간 사용량 표시 (가능한 경우)
+  if (navigator.storage.estimate) {
+    try {
+      const { usage } = await navigator.storage.estimate();
+      if (usage != null) {
+        const kb = (usage / 1024).toFixed(1);
+        storageStatusEl.innerHTML += `<br><span class="storage-usage">사용 중: ${kb} KB</span>`;
+      }
+    } catch (e) { /* 무시 */ }
+  }
+}
+
+if (persistBtn) {
+  persistBtn.addEventListener('click', async () => {
+    if (navigator.storage && navigator.storage.persist) {
+      const granted = await navigator.storage.persist();
+      if (granted) {
+        await updateStorageStatus();
+      } else {
+        storageStatusEl.innerHTML = '⚠️ 브라우저가 영구 보존을 거부했습니다.<br>앱을 홈 화면에 설치하면 자동으로 켜질 수 있어요. 그때까지는 백업을 자주 해주세요.';
+        storageStatusEl.className = 'storage-status warn';
+      }
+    }
+  });
+}
+
+// 페이지 로드 시 자동으로 영구 저장소 요청 시도
+(async function initStorage() {
+  if (navigator.storage && navigator.storage.persist) {
+    const already = await navigator.storage.persisted();
+    if (!already) {
+      // 자동 요청 (설치된 PWA에서는 보통 자동 승인됨)
+      await navigator.storage.persist();
+    }
+  }
+  await updateStorageStatus();
+})();
