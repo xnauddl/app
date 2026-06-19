@@ -86,6 +86,18 @@
         <h2>최근 식사 기록</h2>
         <div class="list" id="meals-list"></div>
       </div>
+
+      <div class="card" id="backup-card">
+        <h2>💾 백업 · 복원</h2>
+        <p class="hint">기록은 이 브라우저에만 저장됩니다. 기기 변경이나 브라우저 정리에 대비해 가끔 백업 파일을 저장해 두세요.</p>
+        <div class="backup-summary" id="backup-summary"></div>
+        <div class="row">
+          <button class="btn primary" id="export-btn">백업 파일 내보내기</button>
+          <button class="btn ghost" id="import-btn">백업에서 복원</button>
+        </div>
+        <p class="hint" id="backup-status"></p>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+      </div>
     </section>
   </main>
 
@@ -152,10 +164,7 @@
   </div>
 
   <footer class="app-footer">
-    <span>데이터는 이 브라우저에만 저장됩니다.</span>
-    <button class="btn link" id="export-btn">데이터 내보내기</button>
-    <button class="btn link" id="import-btn">가져오기</button>
-    <input type="file" id="import-file" accept="application/json" hidden />
+    <span>데이터는 이 브라우저에만 저장됩니다. 백업은 ‘추이 · 기록’ 탭에서 할 수 있어요.</span>
   </footer>
 
   <script src="app.js"></script>

@@ -239,6 +239,16 @@ input:focus { outline: none; border-color: var(--pink); }
 .predict-item { display: flex; justify-content: space-between; padding: 10px 12px; background: var(--pink-soft); border-radius: 10px; font-size: 0.9rem; }
 .predict-item b { color: var(--pink-dark); }
 
+/* Backup */
+.backup-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
+.backup-summary .bchip {
+  background: var(--pink-soft); color: var(--pink-dark); border-radius: 10px;
+  padding: 8px 12px; font-size: 0.82rem; font-weight: 600;
+}
+.backup-summary .bchip b { font-size: 1rem; }
+#backup-status.ok { color: var(--green); }
+#backup-status.warn { color: var(--period); }
+
 /* Footer */
 .app-footer { text-align: center; padding: 16px; color: var(--muted); font-size: 0.8rem; display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
 

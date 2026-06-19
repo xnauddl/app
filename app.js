@@ -485,31 +485,115 @@ function renderMealsList() {
   }).join("");
 }
 
-function renderTrends() { renderWeightStats(); renderWeightChart(); renderWeightList(); renderMealsList(); }
+function renderTrends() { renderWeightStats(); renderWeightChart(); renderWeightList(); renderMealsList(); renderBackupSummary(); }
 
 /* ============================================================
-   데이터 내보내기 / 가져오기
+   백업 · 복원
    ============================================================ */
+const LAST_BACKUP_KEY = "health-diary-last-backup"; // db 와 분리(복원에도 보존)
+const backupStatus = document.getElementById("backup-status");
+
+function dataCounts(d) {
+  const mealDays = Object.keys(d.meals || {}).filter((k) =>
+    MEAL_KEYS.some((m) => d.meals[k][m] && (d.meals[k][m].eaten || (d.meals[k][m].text || "").trim()))
+  ).length;
+  return {
+    weights: Object.keys(d.weights || {}).length,
+    meals: mealDays,
+    periods: (d.periods || []).length,
+    relations: Object.keys(d.relations || {}).length,
+  };
+}
+
+function renderBackupSummary() {
+  const box = document.getElementById("backup-summary");
+  const c = dataCounts(db);
+  box.innerHTML = `
+    <span class="bchip">몸무게 <b>${c.weights}</b>일</span>
+    <span class="bchip">식사 <b>${c.meals}</b>일</span>
+    <span class="bchip">월경 <b>${c.periods}</b>회</span>
+    <span class="bchip">부부관계 <b>${c.relations}</b>일</span>`;
+  const last = localStorage.getItem(LAST_BACKUP_KEY);
+  if (last) {
+    const d = new Date(last);
+    backupStatus.className = "hint";
+    backupStatus.textContent = `최근 백업: ${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  } else {
+    backupStatus.className = "hint";
+    backupStatus.textContent = "아직 백업한 적이 없습니다.";
+  }
+}
+
+/* 내보내기 */
 document.getElementById("export-btn").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
+  const payload = { app: "health-diary", version: 1, exportedAt: new Date().toISOString(), data: db };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = `health-diary-${todayISO()}.json`; a.click();
+  a.href = url; a.download = `건강다이어리-백업-${todayISO()}.json`; a.click();
   URL.revokeObjectURL(url);
+  localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+  renderBackupSummary();
+  backupStatus.className = "hint ok";
+  backupStatus.textContent = "백업 파일을 저장했습니다. 안전한 곳에 보관하세요.";
 });
+
+/* 복원 */
 document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+
+// 백업 파일을 유효한 db 객체로 정규화. 실패 시 예외.
+function normalizeBackup(parsed) {
+  if (!parsed || typeof parsed !== "object") throw new Error("형식 오류");
+  // 신형: {app, version, data} / 구형: db 객체 그대로
+  const raw = parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
+  const looksLikeData = ["weights", "meals", "periods", "relations", "settings"].some((k) => k in raw);
+  if (!looksLikeData) throw new Error("건강 다이어리 백업 파일이 아닙니다");
+  const out = defaultData();
+  if (raw.weights && typeof raw.weights === "object") out.weights = raw.weights;
+  if (raw.meals && typeof raw.meals === "object") out.meals = raw.meals;
+  if (Array.isArray(raw.periods)) out.periods = raw.periods.slice().sort();
+  if (raw.relations && typeof raw.relations === "object") out.relations = raw.relations;
+  if (raw.settings && typeof raw.settings === "object") {
+    out.settings.cycleLength = clampInt(raw.settings.cycleLength, 20, 40, 28);
+    out.settings.periodLength = clampInt(raw.settings.periodLength, 2, 10, 5);
+  }
+  return out;
+}
+
 document.getElementById("import-file").addEventListener("change", (e) => {
   const file = e.target.files[0];
+  e.target.value = ""; // 같은 파일 다시 선택 가능하도록 초기화
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
+    let restored;
     try {
-      const imported = JSON.parse(reader.result);
-      db = Object.assign(defaultData(), imported);
-      saveDB();
-      initAll();
-      alert("데이터를 가져왔습니다.");
-    } catch (err) { alert("올바른 파일이 아닙니다."); }
+      restored = normalizeBackup(JSON.parse(reader.result));
+    } catch (err) {
+      backupStatus.className = "hint warn";
+      backupStatus.textContent = `복원 실패: ${err.message}`;
+      return;
+    }
+    const c = dataCounts(restored);
+    const ok = confirm(
+      `이 백업으로 복원하면 현재 기록을 모두 덮어씁니다.\n\n` +
+      `복원할 내용: 몸무게 ${c.weights}일 · 식사 ${c.meals}일 · 월경 ${c.periods}회 · 부부관계 ${c.relations}일\n\n` +
+      `계속할까요?`
+    );
+    if (!ok) {
+      backupStatus.className = "hint";
+      backupStatus.textContent = "복원을 취소했습니다.";
+      return;
+    }
+    db = restored;
+    saveDB();
+    initAll();
+    backupStatus.className = "hint ok";
+    backupStatus.textContent = "백업에서 복원했습니다.";
+  };
+  reader.onerror = () => {
+    backupStatus.className = "hint warn";
+    backupStatus.textContent = "파일을 읽지 못했습니다.";
   };
   reader.readAsText(file);
 });

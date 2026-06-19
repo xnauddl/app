@@ -6,6 +6,8 @@ try { ({ chromium } = require('playwright')); }
 catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright/index.js')); }
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'fs';
+import os from 'os';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const url = 'file://' + path.join(__dirname, 'index.html');
@@ -118,6 +120,57 @@ const persisted = await page.evaluate(() => {
   return { w: d.weights['2026-06-03'], periods: d.periods.length };
 });
 check('새로고침 후 데이터 유지', persisted.w === 58.4 && persisted.periods === 2, JSON.stringify(persisted));
+
+// 8) 백업 · 복원
+await page.click('.tab[data-tab="trends"]');
+await page.waitForSelector('#tab-trends.active');
+const summaryText = await page.textContent('#backup-summary');
+check('백업 요약 칩 표시', summaryText.includes('몸무게') && summaryText.includes('부부관계'), summaryText.replace(/\s+/g, ' ').trim());
+
+// 내보내기(다운로드) 캡처 후 내용 검증
+const [download] = await Promise.all([
+  page.waitForEvent('download'),
+  page.click('#export-btn'),
+]);
+const dlPath = await download.path();
+const exported = JSON.parse(fs.readFileSync(dlPath, 'utf8'));
+check('백업 파일 형식(app/version/data)', exported.app === 'health-diary' && exported.version === 1 && !!exported.data);
+check('백업에 몸무게 데이터 포함', exported.data.weights['2026-06-03'] === 58.4);
+
+// 다이얼로그(확인창) 자동 수락
+page.on('dialog', (d) => d.accept());
+
+// 유효한 백업으로 복원 → 기존 데이터 대체
+const restoreFile = path.join(os.tmpdir(), 'restore-valid.json');
+fs.writeFileSync(restoreFile, JSON.stringify({
+  app: 'health-diary', version: 1, data: {
+    weights: { '2030-01-01': 62 },
+    meals: {}, periods: ['2030-01-01'], relations: { '2030-01-02': true },
+    settings: { cycleLength: 30, periodLength: 4 },
+  },
+}));
+await page.setInputFiles('#import-file', restoreFile);
+await page.waitForFunction(() => {
+  const d = JSON.parse(localStorage.getItem('health-diary-v1'));
+  return d.weights['2030-01-01'] === 62 && d.weights['2026-06-03'] === undefined;
+}, null, { timeout: 5000 }).then(() => check('유효 백업 복원(데이터 대체)', true))
+  .catch(() => check('유효 백업 복원(데이터 대체)', false));
+const restoredCycle = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).settings.cycleLength);
+check('복원 시 설정값 반영(주기 30)', restoredCycle === 30, `cycleLength=${restoredCycle}`);
+const restoreStatus = await page.textContent('#backup-status');
+check('복원 완료 메시지', restoreStatus.includes('복원'));
+
+// 잘못된 파일 복원 거부
+const badFile = path.join(os.tmpdir(), 'restore-bad.json');
+fs.writeFileSync(badFile, JSON.stringify({ foo: 1, bar: 2 }));
+await page.setInputFiles('#import-file', badFile);
+await page.waitForFunction(
+  () => document.getElementById('backup-status').textContent.includes('복원 실패'),
+  null, { timeout: 5000 }
+).then(() => check('잘못된 파일 복원 거부', true)).catch(() => check('잘못된 파일 복원 거부', false));
+// 거부 후 데이터 보존 확인
+const stillThere = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).weights['2030-01-01']);
+check('복원 거부 시 기존 데이터 보존', stillThere === 62);
 
 // 스크린샷
 await page.screenshot({ path: path.join(__dirname, 'test-calendar.png'), fullPage: true });
