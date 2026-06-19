@@ -10,6 +10,7 @@ const defaultData = () => ({
   weights: {},               // { "YYYY-MM-DD": number }
   meals: {},                 // { "YYYY-MM-DD": { breakfast:{eaten,text}, lunch:{...}, dinner:{...} } }
   periods: [],               // [ "YYYY-MM-DD", ... ] 월경 시작일 목록
+  relations: {},             // { "YYYY-MM-DD": true } 부부관계 있은 날
   settings: { cycleLength: 28, periodLength: 5 },
 });
 
@@ -190,10 +191,11 @@ function renderCalendar() {
     const type = map[iso] || "";
     const isToday = iso === today;
     const mark = CYCLE_MARK[type] || "";
+    const heart = db.relations[iso] ? `<span class="cal-heart">❤</span>` : "";
     const w = db.weights[iso];
     const weightHtml = w != null ? `<span class="cal-w">${w}</span>` : "";
     html += `<div class="cal-cell ${type} ${isToday ? "today" : ""}" data-date="${iso}">
-      <span class="cal-top"><span class="cal-day">${day}</span><span class="cal-mark">${mark}</span></span>
+      <span class="cal-top"><span class="cal-day">${day}</span><span class="cal-mark">${mark}${heart}</span></span>
       ${weightHtml}
       ${mealsDotsHtml(iso)}
     </div>`;
@@ -242,6 +244,8 @@ const dayModal = document.getElementById("day-modal");
 const dayWeight = document.getElementById("day-weight");
 const dayPeriodToggle = document.getElementById("day-period-toggle");
 const dayCycleInfo = document.getElementById("day-cycle-info");
+const dayRelToggle = document.getElementById("day-rel-toggle");
+const dayRelInfo = document.getElementById("day-rel-info");
 let selectedDate = null;
 
 function openDayModal(iso) {
@@ -261,6 +265,9 @@ function openDayModal(iso) {
 
   // 월경
   updatePeriodToggle(iso);
+
+  // 부부관계
+  updateRelToggle(iso);
 
   dayModal.hidden = false;
 }
@@ -336,7 +343,34 @@ dayPeriodToggle.addEventListener("click", () => {
 
   saveDB();
   updatePeriodToggle(selectedDate);
+  updateRelToggle(selectedDate);
   renderCalendarView();
+});
+
+/* 부부관계 토글 */
+function updateRelToggle(iso) {
+  const on = !!db.relations[iso];
+  dayRelToggle.classList.toggle("active", on);
+  dayRelToggle.textContent = on ? "❤️ 부부관계 있음 (해제)" : "부부관계 있음으로 기록";
+
+  // 가임기 / 배란일에 해당하면 안내
+  const type = buildCycleMap()[iso];
+  if (on && (type === "fertile" || type === "ovulation")) {
+    dayRelInfo.textContent = type === "ovulation"
+      ? "배란일입니다 — 임신 가능성이 가장 높은 날이에요."
+      : "가임기에 해당하는 날이에요.";
+  } else {
+    dayRelInfo.textContent = "";
+  }
+}
+
+dayRelToggle.addEventListener("click", () => {
+  if (!selectedDate) return;
+  if (db.relations[selectedDate]) delete db.relations[selectedDate];
+  else db.relations[selectedDate] = true;
+  saveDB();
+  updateRelToggle(selectedDate);
+  renderCalendar();
 });
 
 /* ============================================================
