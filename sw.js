@@ -1,10 +1,10 @@
 const CACHE_NAME = 'health-diary-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/manifest.json',
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './manifest.json',
 ];
 
 // 설치: 필수 리소스 캐싱
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (e) => {
         })
         .catch(() => {
           // 오프라인 + 캐시 없음: 간단한 오프라인 페이지 반환
-          return caches.match('/index.html').then((res) => res || new Response('오프라인 상태입니다.'));
+          return caches.match('./index.html').then((res) => res || new Response('오프라인 상태입니다.'));
         });
     })
   );

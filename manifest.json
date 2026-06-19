@@ -2,8 +2,8 @@
   "name": "건강 다이어리",
   "short_name": "건강 다이어리",
   "description": "몸무게·식사·월경을 한 곳에서 기록하는 건강 관리 앱",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fdf2f8",
@@ -42,7 +42,7 @@
       "name": "달력 보기",
       "short_name": "달력",
       "description": "월경 달력을 확인하세요",
-      "url": "/?tab=calendar",
+      "url": "./?tab=calendar",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%23ec4899' width='96' height='96' rx='20'/><text x='48' y='72' font-size='60' text-anchor='middle' dominant-baseline='middle'>📅</text></svg>",
@@ -55,7 +55,7 @@
       "name": "몸무게 기록",
       "short_name": "몸무게",
       "description": "오늘의 몸무게를 기록하세요",
-      "url": "/?tab=trends",
+      "url": "./?tab=trends",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%23ec4899' width='96' height='96' rx='20'/><text x='48' y='72' font-size='60' text-anchor='middle' dominant-baseline='middle'>⚖️</text></svg>",
