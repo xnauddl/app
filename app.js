@@ -514,7 +514,7 @@ function renderWeightChart() {
 
   let dots = "";
   data.forEach((d, i) => {
-    dots += `<circle cx="${x(i)}" cy="${y(d.kg)}" r="3.5" fill="#ec4899"/>`;
+    dots += `<circle cx="${x(i)}" cy="${y(d.kg)}" r="3.5" fill="#dc2626"/>`;
     if (n <= 12 || i === 0 || i === n - 1) {
       const dd = fromISO(d.date);
       dots += `<text x="${x(i)}" y="${H - pad + 16}" text-anchor="middle" fill="#9ca3af" font-size="9">${dd.getMonth()+1}/${dd.getDate()}</text>`;
@@ -523,8 +523,8 @@ function renderWeightChart() {
 
   svg.innerHTML = `
     ${grid}
-    <polygon points="${areaPts}" fill="#fce7f3" opacity="0.7"/>
-    <polyline points="${linePts}" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polygon points="${areaPts}" fill="#f5f5f5" opacity="0.7"/>
+    <polyline points="${linePts}" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     ${dots}`;
 }
 

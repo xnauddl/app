@@ -5,8 +5,8 @@ try { ({ chromium } = require('playwright')); }
 catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright/index.js')); }
 import fs from 'fs';
 
-// 분홍 배경 + 흰 꽃(5 꽃잎) + 노란 중심. scale로 꽃 크기 조절(마스커블용 여백).
-function flowerSVG(size, flowerScale = 1, bg = '#ec4899') {
+// 빨강 배경 + 흰 꽃(5 꽃잎) + 검정 중심. scale로 꽃 크기 조절(마스커블용 여백).
+function flowerSVG(size, flowerScale = 1, bg = '#dc2626') {
   const petals = [0, 72, 144, 216, 288].map(
     (a) => `<ellipse cx="0" cy="-92" rx="48" ry="84" transform="rotate(${a})"/>`
   ).join('');
@@ -14,8 +14,8 @@ function flowerSVG(size, flowerScale = 1, bg = '#ec4899') {
     <rect width="512" height="512" fill="${bg}"/>
     <g transform="translate(256,256) scale(${flowerScale})">
       <g fill="#ffffff" opacity="0.97">${petals}</g>
-      <circle r="52" fill="#fde047"/>
-      <circle r="52" fill="none" stroke="#fbbf24" stroke-width="4"/>
+      <circle r="52" fill="#000000"/>
+      <circle r="52" fill="none" stroke="#333333" stroke-width="4"/>
     </g>
   </svg>`;
 }
