@@ -20,7 +20,7 @@ function flowerSVG(size, flowerScale = 1, bg = '#ec4899') {
   </svg>`;
 }
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ headless: true });
 
 async function render(svg, size, outPath) {
   const page = await browser.newPage({ viewport: { width: size, height: size } });
@@ -42,5 +42,17 @@ await render(flowerSVG(512, 0.66), 512, 'icon-maskable-512.png');
 // Apple 터치 아이콘
 await render(flowerSVG(180, 1.0), 180, 'apple-touch-icon.png');
 
+// 앱 스크린샷 생성 (540x720 헤드리스 모드)
+const screenshotPage = await browser.newPage({
+  viewport: { width: 540, height: 720 },
+  deviceScaleFactor: 1
+});
+await screenshotPage.goto('file://' + process.cwd() + '/index.html', { waitUntil: 'networkidle' });
+await screenshotPage.waitForTimeout(500);
+await screenshotPage.screenshot({ path: 'screenshot-narrow.png', fullPage: false });
+await screenshotPage.close();
+const screenshotKb = (fs.statSync('screenshot-narrow.png').size / 1024).toFixed(1);
+console.log(`✅ screenshot-narrow.png (540x720, ${screenshotKb} KB)`);
+
 await browser.close();
-console.log('\n아이콘 생성 완료!');
+console.log('\n아이콘 및 스크린샷 생성 완료!');
