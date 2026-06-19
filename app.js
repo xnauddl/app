@@ -697,8 +697,8 @@ function initAll() {
 initAll();
 
 /* ---------- Service Worker 등록 ---------- */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch((err) => {
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('./sw.js').catch((err) => {
     console.log('Service Worker 등록 실패:', err);
   });
 }
