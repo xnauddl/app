@@ -239,6 +239,12 @@ input:focus { outline: none; border-color: var(--pink); }
 .predict-item { display: flex; justify-content: space-between; padding: 10px 12px; background: var(--pink-soft); border-radius: 10px; font-size: 0.9rem; }
 .predict-item b { color: var(--pink-dark); }
 
+/* Storage protection */
+.storage-status { font-size: 0.9rem; line-height: 1.6; padding: 12px; border-radius: 10px; }
+.storage-status.ok { background: #f0fdf4; color: #065f46; }
+.storage-status.warn { background: #fef2f2; color: #991b1b; }
+.storage-usage { font-size: 0.78rem; opacity: 0.7; }
+
 /* Backup */
 .backup-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
 .backup-summary .bchip {
