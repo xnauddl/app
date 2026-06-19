@@ -695,3 +695,10 @@ function initAll() {
   renderTrends();
 }
 initAll();
+
+/* ---------- Service Worker 등록 ---------- */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch((err) => {
+    console.log('Service Worker 등록 실패:', err);
+  });
+}
