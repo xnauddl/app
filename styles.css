@@ -1,19 +1,19 @@
 :root {
-  --bg: #fdf2f8;
+  --bg: #ffffff;
   --card: #ffffff;
-  --ink: #1f2937;
+  --ink: #000000;
   --muted: #6b7280;
-  --line: #f1d4e5;
-  --pink: #ec4899;
-  --pink-dark: #be185d;
-  --pink-soft: #fce7f3;
+  --line: #e5e7eb;
+  --pink: #dc2626;
+  --pink-dark: #000000;
+  --pink-soft: #f5f5f5;
   --blue: #3b82f6;
   --green: #10b981;
   --period: #ef4444;
   --predicted: #fca5a5;
   --fertile: #bbf7d0;
   --ovulation: #8b5cf6;
-  --shadow: 0 4px 16px rgba(190, 24, 93, 0.08);
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   --radius: 16px;
 }
 

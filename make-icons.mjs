@@ -5,22 +5,22 @@ try { ({ chromium } = require('playwright')); }
 catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright/index.js')); }
 import fs from 'fs';
 
-// 분홍 배경 + 흰 꽃(5 꽃잎) + 노란 중심. scale로 꽃 크기 조절(마스커블용 여백).
-function flowerSVG(size, flowerScale = 1, bg = '#ec4899') {
+// 밝은 빨강 배경 + 흰 꽃(5 꽃잎) + 밝은 중심. scale로 꽃 크기 조절(마스커블용 여백).
+function flowerSVG(size, flowerScale = 1, bg = '#f87171') {
   const petals = [0, 72, 144, 216, 288].map(
     (a) => `<ellipse cx="0" cy="-92" rx="48" ry="84" transform="rotate(${a})"/>`
   ).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
     <rect width="512" height="512" fill="${bg}"/>
     <g transform="translate(256,256) scale(${flowerScale})">
-      <g fill="#ffffff" opacity="0.97">${petals}</g>
-      <circle r="52" fill="#fde047"/>
-      <circle r="52" fill="none" stroke="#fbbf24" stroke-width="4"/>
+      <g fill="#ffffff" opacity="0.98">${petals}</g>
+      <circle r="52" fill="#d1d5db"/>
+      <circle r="52" fill="none" stroke="#e5e7eb" stroke-width="4"/>
     </g>
   </svg>`;
 }
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ headless: true });
 
 async function render(svg, size, outPath) {
   const page = await browser.newPage({ viewport: { width: size, height: size } });
@@ -42,5 +42,17 @@ await render(flowerSVG(512, 0.66), 512, 'icon-maskable-512.png');
 // Apple 터치 아이콘
 await render(flowerSVG(180, 1.0), 180, 'apple-touch-icon.png');
 
+// 앱 스크린샷 생성 (540x960 헤드리스 모드 - 전체 디바이스 화면 채움)
+const screenshotPage = await browser.newPage({
+  viewport: { width: 540, height: 960 },
+  deviceScaleFactor: 1
+});
+await screenshotPage.goto('file://' + process.cwd() + '/index.html', { waitUntil: 'networkidle' });
+await screenshotPage.waitForTimeout(500);
+await screenshotPage.screenshot({ path: 'screenshot-narrow.png', fullPage: false });
+await screenshotPage.close();
+const screenshotKb = (fs.statSync('screenshot-narrow.png').size / 1024).toFixed(1);
+console.log(`✅ screenshot-narrow.png (540x960, ${screenshotKb} KB)`);
+
 await browser.close();
-console.log('\n아이콘 생성 완료!');
+console.log('\n아이콘 및 스크린샷 생성 완료!');

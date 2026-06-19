@@ -10,8 +10,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
-  "background_color": "#fdf2f8",
-  "theme_color": "#ec4899",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
   "prefer_related_applications": false,
   "related_applications": [],
   "launch_handler": {
@@ -73,7 +73,7 @@
   "screenshots": [
     {
       "src": "screenshot-narrow.png",
-      "sizes": "540x720",
+      "sizes": "540x960",
       "type": "image/png",
       "form_factor": "narrow"
     }
