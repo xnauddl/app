@@ -42,9 +42,9 @@ await render(flowerSVG(512, 0.66), 512, 'icon-maskable-512.png');
 // Apple 터치 아이콘
 await render(flowerSVG(180, 1.0), 180, 'apple-touch-icon.png');
 
-// 앱 스크린샷 생성 (540x720 헤드리스 모드)
+// 앱 스크린샷 생성 (540x960 헤드리스 모드 - 전체 디바이스 화면 채움)
 const screenshotPage = await browser.newPage({
-  viewport: { width: 540, height: 720 },
+  viewport: { width: 540, height: 960 },
   deviceScaleFactor: 1
 });
 await screenshotPage.goto('file://' + process.cwd() + '/index.html', { waitUntil: 'networkidle' });
@@ -52,7 +52,7 @@ await screenshotPage.waitForTimeout(500);
 await screenshotPage.screenshot({ path: 'screenshot-narrow.png', fullPage: false });
 await screenshotPage.close();
 const screenshotKb = (fs.statSync('screenshot-narrow.png').size / 1024).toFixed(1);
-console.log(`✅ screenshot-narrow.png (540x720, ${screenshotKb} KB)`);
+console.log(`✅ screenshot-narrow.png (540x960, ${screenshotKb} KB)`);
 
 await browser.close();
 console.log('\n아이콘 및 스크린샷 생성 완료!');

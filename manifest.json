@@ -73,7 +73,7 @@
   "screenshots": [
     {
       "src": "screenshot-narrow.png",
-      "sizes": "540x720",
+      "sizes": "540x960",
       "type": "image/png",
       "form_factor": "narrow"
     }
