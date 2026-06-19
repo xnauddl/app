@@ -1,10 +1,14 @@
-const CACHE_NAME = 'health-diary-v1';
+const CACHE_NAME = 'health-diary-v2';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
+  './apple-touch-icon.png',
 ];
 
 // 설치: 필수 리소스 캐싱
