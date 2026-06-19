@@ -203,6 +203,7 @@ input:focus { outline: none; border-color: var(--pink); }
   display: flex; align-items: flex-end; justify-content: center; z-index: 100;
   padding: 0; animation: fade 0.2s ease;
 }
+.modal-backdrop[hidden] { display: none; }
 .modal {
   background: var(--card); width: 100%; max-width: 720px;
   border-radius: 20px 20px 0 0; padding: 18px 18px 28px;
