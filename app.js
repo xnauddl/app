@@ -648,43 +648,86 @@ function normalizeBackup(parsed) {
   return out;
 }
 
+// 텍스트(JSON 문자열)로부터 복원. 파일 입력/파일 핸들러/공유에서 공용으로 사용.
+function restoreFromText(text) {
+  let restored;
+  try {
+    restored = normalizeBackup(JSON.parse(text));
+  } catch (err) {
+    backupStatus.className = "hint warn";
+    backupStatus.textContent = `복원 실패: ${err.message}`;
+    return false;
+  }
+  const c = dataCounts(restored);
+  const ok = confirm(
+    `이 백업으로 복원하면 현재 기록을 모두 덮어씁니다.\n\n` +
+    `복원할 내용: 몸무게 ${c.weights}일 · 식사 ${c.meals}일 · 월경 ${c.periods}회 · 부부관계 ${c.relations}일\n\n` +
+    `계속할까요?`
+  );
+  if (!ok) {
+    backupStatus.className = "hint";
+    backupStatus.textContent = "복원을 취소했습니다.";
+    return false;
+  }
+  db = restored;
+  saveDB();
+  initAll();
+  backupStatus.className = "hint ok";
+  backupStatus.textContent = "백업에서 복원했습니다.";
+  return true;
+}
+
 document.getElementById("import-file").addEventListener("change", (e) => {
   const file = e.target.files[0];
   e.target.value = ""; // 같은 파일 다시 선택 가능하도록 초기화
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
-    let restored;
-    try {
-      restored = normalizeBackup(JSON.parse(reader.result));
-    } catch (err) {
-      backupStatus.className = "hint warn";
-      backupStatus.textContent = `복원 실패: ${err.message}`;
-      return;
-    }
-    const c = dataCounts(restored);
-    const ok = confirm(
-      `이 백업으로 복원하면 현재 기록을 모두 덮어씁니다.\n\n` +
-      `복원할 내용: 몸무게 ${c.weights}일 · 식사 ${c.meals}일 · 월경 ${c.periods}회 · 부부관계 ${c.relations}일\n\n` +
-      `계속할까요?`
-    );
-    if (!ok) {
-      backupStatus.className = "hint";
-      backupStatus.textContent = "복원을 취소했습니다.";
-      return;
-    }
-    db = restored;
-    saveDB();
-    initAll();
-    backupStatus.className = "hint ok";
-    backupStatus.textContent = "백업에서 복원했습니다.";
-  };
+  reader.onload = () => restoreFromText(reader.result);
   reader.onerror = () => {
     backupStatus.className = "hint warn";
     backupStatus.textContent = "파일을 읽지 못했습니다.";
   };
   reader.readAsText(file);
 });
+
+/* ---------- 파일 핸들러 (백업 .json 파일 열기) ---------- */
+// manifest의 file_handlers로 등록된 .json 파일을 앱에서 직접 열 때 처리
+if ("launchQueue" in window && typeof LaunchParams !== "undefined" && "files" in LaunchParams.prototype) {
+  window.launchQueue.setConsumer(async (launchParams) => {
+    if (!launchParams.files || !launchParams.files.length) return;
+    try {
+      const fileHandle = launchParams.files[0];
+      const file = await fileHandle.getFile();
+      const text = await file.text();
+      // 추이·기록 탭으로 전환 후 복원
+      document.querySelector('.tab[data-tab="trends"]').click();
+      restoreFromText(text);
+    } catch (e) {
+      console.log("파일 열기 실패:", e);
+    }
+  });
+}
+
+/* ---------- 공유 대상 (다른 앱에서 백업 파일 공유받기) ---------- */
+// manifest의 share_target으로 공유된 백업을 Service Worker가 캐시에 저장 → 앱에서 복원
+(async function checkSharedBackup() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has("shared")) return;
+  try {
+    const cache = await caches.open("shared-backup");
+    const res = await cache.match("shared-data");
+    if (res) {
+      const text = await res.text();
+      await cache.delete("shared-data");
+      document.querySelector('.tab[data-tab="trends"]').click();
+      restoreFromText(text);
+    }
+  } catch (e) {
+    console.log("공유 데이터 복원 실패:", e);
+  }
+  // URL에서 ?shared 파라미터 정리
+  if (history.replaceState) history.replaceState(null, "", "./");
+})();
 
 /* ---------- 초기 렌더 ---------- */
 function initAll() {

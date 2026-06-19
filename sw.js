@@ -39,6 +39,26 @@ self.addEventListener('fetch', (e) => {
   const { request } = e;
   const url = new URL(request.url);
 
+  // 공유 대상: 다른 앱에서 공유한 백업 파일(POST) 처리
+  if (request.method === 'POST' && url.searchParams.has('share-target')) {
+    e.respondWith((async () => {
+      try {
+        const formData = await request.formData();
+        const file = formData.get('backup');
+        if (file) {
+          const text = await file.text();
+          const cache = await caches.open('shared-backup');
+          await cache.put('shared-data', new Response(text));
+        }
+      } catch (err) {
+        // 무시: 앱에서 공유 데이터 없음 처리
+      }
+      // 앱을 열고 공유된 데이터를 복원하도록 리다이렉트
+      return Response.redirect('./?shared=1', 303);
+    })());
+    return;
+  }
+
   // 같은 도메인의 GET 요청만 처리
   if (url.origin !== location.origin || request.method !== 'GET') {
     return;
