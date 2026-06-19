@@ -60,6 +60,88 @@ document.querySelectorAll(".tab").forEach((btn) => {
 });
 
 /* ============================================================
+   알림 설정
+   ============================================================ */
+const NOTIFY_KEY = "health-diary-notify-enabled";
+const NOTIFY_SHOWN_KEY = "health-diary-notify-shown-"; // ISO date appended
+
+function requestNotificationPermission() {
+  if (!("Notification" in window)) return false;
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((perm) => {
+      if (perm === "granted") renderPredict(); // UI 갱신
+    });
+  }
+  return Notification.permission === "granted";
+}
+
+function getNextPeriodDate() {
+  if (db.periods.length === 0) return null;
+  const cycle = db.settings.cycleLength;
+  const lastStart = fromISO([...db.periods].sort().pop());
+  return addDays(lastStart, cycle);
+}
+
+function checkAndShowNotification() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  if (!localStorage.getItem(NOTIFY_KEY)) return;
+
+  const nextPeriod = getNextPeriodDate();
+  if (!nextPeriod) return;
+
+  const nextISO = toISO(nextPeriod);
+  const today = todayISO();
+
+  // 예정일 당일 또는 미리 설정한 날짜(기본 D-1)에 알림
+  const notifyDaysAhead = 1;
+  const notifyDate = toISO(addDays(nextPeriod, -notifyDaysAhead));
+
+  // 이미 오늘 알림을 표시했는지 확인
+  const shownKey = NOTIFY_SHOWN_KEY + today;
+  if (localStorage.getItem(shownKey)) return;
+
+  if (today === notifyDate || today === nextISO) {
+    const msg = today === nextISO ? "다음 생리 예정일입니다!" : `다음 생리 예정일까지 ${notifyDaysAhead}일 남았어요.`;
+    new Notification("🌸 건강 다이어리", {
+      body: msg,
+      icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🌸</text></svg>",
+      tag: "period-reminder",
+    });
+    localStorage.setItem(shownKey, "1");
+  }
+}
+
+const notifyToggle = document.getElementById("notify-toggle");
+const notifyHint = document.getElementById("notify-hint");
+
+notifyToggle.checked = !!localStorage.getItem(NOTIFY_KEY);
+
+notifyToggle.addEventListener("change", () => {
+  if (notifyToggle.checked) {
+    const ok = requestNotificationPermission();
+    if (!ok) {
+      notifyToggle.checked = false;
+      notifyHint.textContent = "브라우저에서 알림 권한을 거부했습니다. 브라우저 설정에서 허락해 주세요.";
+      notifyHint.style.color = "var(--period)";
+      return;
+    }
+    localStorage.setItem(NOTIFY_KEY, "1");
+    notifyHint.textContent = "✓ 알림이 활성화되었습니다.";
+    notifyHint.style.color = "var(--green)";
+    checkAndShowNotification();
+  } else {
+    localStorage.removeItem(NOTIFY_KEY);
+    notifyHint.textContent = "알림을 활성화하면 다음 생리 예정일에 브라우저 알림을 받을 수 있어요.";
+    notifyHint.style.color = "var(--muted)";
+  }
+});
+
+// 페이지 로드 시 알림 확인
+window.addEventListener("focus", checkAndShowNotification);
+checkAndShowNotification();
+
+/* ============================================================
    월경 주기 계산
    ============================================================ */
 function getMeals(date) {
@@ -235,7 +317,13 @@ function renderPredict() {
     <div class="predict-item"><span>최근 기록</span><b>${fmtKDate(toISO(lastStart))}</b></div>`;
 }
 
-function renderCalendarView() { renderCalendar(); renderPredict(); }
+function renderCalendarView() {
+  renderCalendar();
+  renderPredict();
+  // 월경 기록 변경 시 알림 상태 업데이트
+  notifyToggle.checked = !!localStorage.getItem(NOTIFY_KEY);
+  checkAndShowNotification();
+}
 
 /* ============================================================
    날짜 상세 모달 (몸무게 · 식사 · 월경)

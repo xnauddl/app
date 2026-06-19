@@ -45,8 +45,15 @@
       </div>
 
       <div class="card">
-        <h2>예측 요약</h2>
+        <div class="card-head">
+          <h2>예측 요약</h2>
+          <label class="switch">
+            <input type="checkbox" id="notify-toggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
         <div class="predict" id="cycle-predict"></div>
+        <p class="hint" id="notify-hint">알림을 활성화하면 다음 생리 예정일에 브라우저 알림을 받을 수 있어요.</p>
       </div>
 
       <div class="card">
