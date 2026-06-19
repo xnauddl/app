@@ -167,19 +167,57 @@ input:focus { outline: none; border-color: var(--pink); }
 .cal-weekdays .sat { color: var(--blue); }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .cal-cell {
-  aspect-ratio: 1 / 1; border-radius: 10px; border: 1.5px solid transparent;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 0.9rem; cursor: pointer; background: #fafafa; position: relative;
-  transition: all 0.12s;
+  min-height: 60px; border-radius: 10px; border: 1.5px solid transparent;
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 3px 4px; font-size: 0.9rem; cursor: pointer; background: #fafafa; position: relative;
+  transition: all 0.12s; overflow: hidden;
 }
 .cal-cell.empty-cell { background: transparent; cursor: default; }
 .cal-cell:not(.empty-cell):hover { border-color: var(--pink); }
-.cal-cell.period { background: var(--period); color: #fff; font-weight: 700; }
+.cal-cell.period { background: var(--period); color: #fff; }
 .cal-cell.predicted { background: var(--predicted); color: #7f1d1d; }
 .cal-cell.fertile { background: var(--fertile); color: #065f46; }
-.cal-cell.ovulation { background: var(--ovulation); color: #fff; font-weight: 700; }
+.cal-cell.ovulation { background: var(--ovulation); color: #fff; }
 .cal-cell.today { border-color: var(--ink); }
-.cal-cell .marker { font-size: 0.6rem; line-height: 1; margin-top: 2px; }
+
+.cal-top { display: flex; justify-content: space-between; align-items: center; line-height: 1; }
+.cal-day { font-size: 0.82rem; font-weight: 600; }
+.cal-mark { font-size: 0.58rem; opacity: 0.9; }
+.cal-w { font-size: 0.72rem; font-weight: 700; text-align: center; margin-top: auto; }
+.cal-meals { display: flex; gap: 3px; justify-content: center; margin-top: 2px; }
+.cal-meals .md { width: 6px; height: 6px; border-radius: 50%; background: rgba(0,0,0,0.18); }
+.cal-cell.period .cal-meals .md, .cal-cell.ovulation .cal-meals .md { background: rgba(255,255,255,0.4); }
+.cal-meals .md.on { background: var(--green); }
+.cal-cell.period .cal-meals .md.on, .cal-cell.ovulation .cal-meals .md.on { background: #fff; }
+/* legend meal dot */
+.legend .md { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: middle; }
+
+/* Day detail modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(31,41,55,0.45);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 100;
+  padding: 0; animation: fade 0.2s ease;
+}
+.modal {
+  background: var(--card); width: 100%; max-width: 720px;
+  border-radius: 20px 20px 0 0; padding: 18px 18px 28px;
+  max-height: 88vh; overflow-y: auto; animation: slideup 0.25s ease;
+}
+@keyframes slideup { from { transform: translateY(40px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-head h2 { margin: 0; }
+.modal-close { border: none; background: #f3f4f6; width: 34px; height: 34px; border-radius: 50%; font-size: 1rem; cursor: pointer; color: var(--muted); }
+.modal-body { display: flex; flex-direction: column; gap: 20px; }
+.field { display: flex; flex-direction: column; gap: 10px; }
+.field-label { font-weight: 700; color: var(--ink); font-size: 0.95rem; }
+.btn.small { padding: 8px 12px; font-size: 0.85rem; }
+.btn.period-btn { background: var(--pink-soft); color: var(--pink-dark); width: 100%; }
+.btn.period-btn.active { background: var(--period); color: #fff; }
+
+@media (min-width: 600px) {
+  .modal-backdrop { align-items: center; }
+  .modal { border-radius: 20px; }
+}
 
 .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; font-size: 0.8rem; color: var(--muted); }
 .legend i.dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; vertical-align: middle; }

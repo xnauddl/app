@@ -4,128 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#ec4899" />
-  <title>건강 다이어리 · 몸무게 · 식사 · 월경 달력</title>
+  <title>건강 다이어리 · 달력</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="app-header">
     <h1>🌸 건강 다이어리</h1>
-    <p class="subtitle">몸무게 · 식사 · 월경 주기를 한 곳에서</p>
+    <p class="subtitle">달력 한 곳에서 몸무게 · 식사 · 월경까지</p>
   </header>
 
   <nav class="tabs" role="tablist">
-    <button class="tab active" data-tab="weight" role="tab">⚖️ 몸무게</button>
-    <button class="tab" data-tab="meals" role="tab">🍽️ 식사</button>
-    <button class="tab" data-tab="cycle" role="tab">🩸 월경 달력</button>
+    <button class="tab active" data-tab="calendar" role="tab">📅 달력</button>
+    <button class="tab" data-tab="trends" role="tab">📊 추이 · 기록</button>
   </nav>
 
   <main>
-    <!-- ===================== 몸무게 ===================== -->
-    <section id="tab-weight" class="tab-panel active">
-      <div class="card">
-        <h2>오늘 몸무게 기록</h2>
-        <div class="row">
-          <label>
-            <span>날짜</span>
-            <input type="date" id="weight-date" />
-          </label>
-          <label>
-            <span>몸무게 (kg)</span>
-            <input type="number" id="weight-value" step="0.1" min="0" placeholder="예: 58.4" />
-          </label>
-          <button class="btn primary" id="weight-save">저장</button>
-        </div>
-        <p class="hint" id="weight-hint"></p>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <h2>변화 추이</h2>
-          <div class="stats" id="weight-stats"></div>
-        </div>
-        <div class="chart-wrap">
-          <svg id="weight-chart" viewBox="0 0 600 260" preserveAspectRatio="xMidYMid meet"></svg>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>기록 목록</h2>
-        <div class="list" id="weight-list"></div>
-      </div>
-    </section>
-
-    <!-- ===================== 식사 ===================== -->
-    <section id="tab-meals" class="tab-panel">
-      <div class="card">
-        <h2>식사 체크</h2>
-        <label class="inline">
-          <span>날짜</span>
-          <input type="date" id="meals-date" />
-        </label>
-
-        <div class="meals-grid">
-          <div class="meal-box" data-meal="breakfast">
-            <div class="meal-head">
-              <span class="meal-emoji">🌅</span>
-              <span class="meal-name">아침</span>
-              <label class="switch">
-                <input type="checkbox" data-meal-check="breakfast" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <input type="text" data-meal-text="breakfast" placeholder="무엇을 먹었나요?" />
-          </div>
-
-          <div class="meal-box" data-meal="lunch">
-            <div class="meal-head">
-              <span class="meal-emoji">☀️</span>
-              <span class="meal-name">점심</span>
-              <label class="switch">
-                <input type="checkbox" data-meal-check="lunch" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <input type="text" data-meal-text="lunch" placeholder="무엇을 먹었나요?" />
-          </div>
-
-          <div class="meal-box" data-meal="dinner">
-            <div class="meal-head">
-              <span class="meal-emoji">🌙</span>
-              <span class="meal-name">저녁</span>
-              <label class="switch">
-                <input type="checkbox" data-meal-check="dinner" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <input type="text" data-meal-text="dinner" placeholder="무엇을 먹었나요?" />
-          </div>
-        </div>
-        <p class="hint" id="meals-hint">변경 사항은 자동으로 저장됩니다.</p>
-      </div>
-
-      <div class="card">
-        <h2>최근 식사 기록</h2>
-        <div class="list" id="meals-list"></div>
-      </div>
-    </section>
-
-    <!-- ===================== 월경 달력 ===================== -->
-    <section id="tab-cycle" class="tab-panel">
-      <div class="card">
-        <h2>주기 설정</h2>
-        <div class="row">
-          <label>
-            <span>평균 주기 (일)</span>
-            <input type="number" id="cycle-length" min="20" max="40" value="28" />
-          </label>
-          <label>
-            <span>월경 기간 (일)</span>
-            <input type="number" id="period-length" min="2" max="10" value="5" />
-          </label>
-        </div>
-        <p class="hint" id="cycle-calc-hint"></p>
-      </div>
-
+    <!-- ===================== 달력 (홈) ===================== -->
+    <section id="tab-calendar" class="tab-panel active">
       <div class="card">
         <div class="cal-head">
           <button class="btn ghost" id="cal-prev">‹</button>
@@ -142,17 +37,111 @@
           <span><i class="dot predicted"></i>예상 월경</span>
           <span><i class="dot fertile"></i>가임기</span>
           <span><i class="dot ovulation"></i>배란일</span>
+          <span><i class="md on"></i>식사</span>
           <span><i class="dot today"></i>오늘</span>
         </div>
-        <p class="hint">날짜를 누르면 월경 시작일로 기록/해제할 수 있어요.</p>
+        <p class="hint">날짜를 누르면 그 날의 몸무게 · 식사 · 월경을 기록할 수 있어요.</p>
       </div>
 
       <div class="card">
         <h2>예측 요약</h2>
         <div class="predict" id="cycle-predict"></div>
       </div>
+
+      <div class="card">
+        <h2>주기 설정</h2>
+        <div class="row">
+          <label>
+            <span>평균 주기 (일)</span>
+            <input type="number" id="cycle-length" min="20" max="40" value="28" />
+          </label>
+          <label>
+            <span>월경 기간 (일)</span>
+            <input type="number" id="period-length" min="2" max="10" value="5" />
+          </label>
+        </div>
+        <p class="hint" id="cycle-calc-hint"></p>
+      </div>
+    </section>
+
+    <!-- ===================== 추이 · 기록 ===================== -->
+    <section id="tab-trends" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <h2>몸무게 추이</h2>
+          <div class="stats" id="weight-stats"></div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="weight-chart" viewBox="0 0 600 260" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>몸무게 기록</h2>
+        <div class="list" id="weight-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>최근 식사 기록</h2>
+        <div class="list" id="meals-list"></div>
+      </div>
     </section>
   </main>
+
+  <!-- ===================== 날짜 상세 모달 ===================== -->
+  <div class="modal-backdrop" id="day-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2 id="day-modal-title">날짜</h2>
+        <button class="modal-close" id="day-modal-close" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- 몸무게 -->
+        <div class="field">
+          <label class="field-label">⚖️ 몸무게 (kg)</label>
+          <div class="row">
+            <input type="number" id="day-weight" step="0.1" min="0" placeholder="예: 58.4" />
+            <button class="btn ghost small" id="day-weight-clear">지우기</button>
+          </div>
+        </div>
+
+        <!-- 식사 -->
+        <div class="field">
+          <label class="field-label">🍽️ 식사</label>
+          <div class="meals-grid">
+            <div class="meal-box" data-dmeal="breakfast">
+              <div class="meal-head">
+                <span class="meal-emoji">🌅</span><span class="meal-name">아침</span>
+                <label class="switch"><input type="checkbox" data-dcheck="breakfast" /><span class="slider"></span></label>
+              </div>
+              <input type="text" data-dtext="breakfast" placeholder="무엇을 먹었나요?" />
+            </div>
+            <div class="meal-box" data-dmeal="lunch">
+              <div class="meal-head">
+                <span class="meal-emoji">☀️</span><span class="meal-name">점심</span>
+                <label class="switch"><input type="checkbox" data-dcheck="lunch" /><span class="slider"></span></label>
+              </div>
+              <input type="text" data-dtext="lunch" placeholder="무엇을 먹었나요?" />
+            </div>
+            <div class="meal-box" data-dmeal="dinner">
+              <div class="meal-head">
+                <span class="meal-emoji">🌙</span><span class="meal-name">저녁</span>
+                <label class="switch"><input type="checkbox" data-dcheck="dinner" /><span class="slider"></span></label>
+              </div>
+              <input type="text" data-dtext="dinner" placeholder="무엇을 먹었나요?" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 월경 -->
+        <div class="field">
+          <label class="field-label">🩸 월경</label>
+          <button class="btn period-btn" id="day-period-toggle">이 날을 월경 시작일로 기록</button>
+          <p class="hint" id="day-cycle-info"></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <footer class="app-footer">
     <span>데이터는 이 브라우저에만 저장됩니다.</span>
