@@ -178,6 +178,34 @@ await page.evaluate(() => window.openDayModal('2026-06-03'));
 await page.waitForSelector('#day-modal:not([hidden])');
 await page.screenshot({ path: path.join(__dirname, 'test-day-modal.png'), fullPage: true });
 
+// 스크린샷 전에 모달 닫기
+await page.evaluate(() => { const m = document.getElementById('day-modal'); if (m && !m.hidden) m.hidden = true; });
+
+// 9) 알림 토글 (달력 탭에 있음)
+await page.click('.tab[data-tab="calendar"]');
+await page.waitForSelector('#tab-calendar.active');
+const notifyHint = page.locator('#notify-hint');
+
+// evaluate로 토글 직접 변경 및 이벤트 발생
+await page.evaluate(() => {
+  const toggle = document.getElementById('notify-toggle');
+  toggle.checked = true;
+  toggle.dispatchEvent(new Event('change', { bubbles: true }));
+});
+await page.waitForTimeout(300);
+let hintText = await notifyHint.textContent();
+check('알림 활성화 시도 후 UI 업데이트', hintText.includes('알림') || hintText.includes('거부'));
+
+// 토글 해제
+await page.evaluate(() => {
+  const toggle = document.getElementById('notify-toggle');
+  toggle.checked = false;
+  toggle.dispatchEvent(new Event('change', { bubbles: true }));
+});
+await page.waitForTimeout(300);
+hintText = await notifyHint.textContent();
+check('알림 비활성화 후 안내문 복구', hintText.includes('활성화하면'));
+
 check('콘솔/페이지 에러 없음', errors.length === 0, errors.join(' | '));
 
 await browser.close();
