@@ -110,14 +110,14 @@
       </div>
 
       <div class="card" id="storage-card">
-        <h2>🔒 데이터 보호</h2>
+        <h2>데이터 보호</h2>
         <div class="storage-status" id="storage-status">확인 중...</div>
         <button class="btn primary" id="persist-btn" style="margin-top:12px;width:100%">데이터 영구 보존 켜기</button>
         <p class="hint">켜두면 브라우저가 저장 공간을 자동으로 비울 때도 이 앱의 기록은 보호됩니다.</p>
       </div>
 
       <div class="card" id="backup-card">
-        <h2>💾 백업 · 복원</h2>
+        <h2>백업 · 복원</h2>
         <p class="hint">기록은 이 브라우저에만 저장됩니다. 기기 변경이나 브라우저 정리에 대비해 가끔 백업 파일을 저장해 두세요.</p>
         <div class="backup-summary" id="backup-summary"></div>
         <div class="row">
@@ -154,21 +154,21 @@
             <div class="meal-box" data-dmeal="breakfast">
               <div class="meal-head">
                 <span class="meal-emoji">🌅</span><span class="meal-name">아침</span>
-                <label class="switch"><input type="checkbox" data-dcheck="breakfast" /><span class="slider"></span></label>
+                <label class="switch"><input type="checkbox" data-dcheck="breakfast" aria-label="아침 먹음" /><span class="slider"></span></label>
               </div>
               <input type="text" data-dtext="breakfast" placeholder="무엇을 먹었나요?" />
             </div>
             <div class="meal-box" data-dmeal="lunch">
               <div class="meal-head">
                 <span class="meal-emoji">☀️</span><span class="meal-name">점심</span>
-                <label class="switch"><input type="checkbox" data-dcheck="lunch" /><span class="slider"></span></label>
+                <label class="switch"><input type="checkbox" data-dcheck="lunch" aria-label="점심 먹음" /><span class="slider"></span></label>
               </div>
               <input type="text" data-dtext="lunch" placeholder="무엇을 먹었나요?" />
             </div>
             <div class="meal-box" data-dmeal="dinner">
               <div class="meal-head">
                 <span class="meal-emoji">🌙</span><span class="meal-name">저녁</span>
-                <label class="switch"><input type="checkbox" data-dcheck="dinner" /><span class="slider"></span></label>
+                <label class="switch"><input type="checkbox" data-dcheck="dinner" aria-label="저녁 먹음" /><span class="slider"></span></label>
               </div>
               <input type="text" data-dtext="dinner" placeholder="무엇을 먹었나요?" />
             </div>

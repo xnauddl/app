@@ -1,4 +1,4 @@
-const CACHE_NAME = 'health-diary-v14';
+const CACHE_NAME = 'health-diary-v15';
 const ASSETS = [
   './',
   './index.html',
