@@ -324,10 +324,10 @@ function renderCalendar() {
     if (isToday) labelParts.push("오늘");
     const aria = labelParts.join(", ");
 
+    const bottom = `${weightHtml}${mealsDotsHtml(iso)}`;
     html += `<div class="cal-cell ${type} ${isToday ? "today" : ""}" data-date="${iso}" role="button" tabindex="0" aria-label="${aria}">
       <span class="cal-top"><span class="cal-day">${day}</span><span class="cal-mark">${mark}${heart}</span></span>
-      ${weightHtml}
-      ${mealsDotsHtml(iso)}
+      ${bottom ? `<span class="cal-bottom">${bottom}</span>` : ""}
     </div>`;
   }
   grid.innerHTML = html;
