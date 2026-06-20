@@ -17,9 +17,9 @@
 
   /* 주기 상태 색 (흑·백·레드 스케일) */
   --period: #dc2626;       /* 월경: 진한 레드 */
-  --predicted: #fca5a5;    /* 예상 월경: 연한 레드 */
+  --predicted: #f87171;    /* 예상 월경: 또렷한 레드(살짝 밝게) */
   --fertile: #ffffff;      /* 가임기: 흰 배경 + 레드 점선 테두리(윤곽만) */
-  --ovulation: #111827;    /* 배란일: 블랙(핵심 하루) */
+  --ovulation: #dc2626;    /* 배란일: 레드 아이콘(✦) + 레드 실선 테두리 */
 
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   --radius: 16px;
@@ -184,9 +184,10 @@ input:focus { outline: none; border-color: var(--accent); }
 .cal-cell.empty-cell { background: transparent; cursor: default; }
 .cal-cell:not(.empty-cell):hover { border-color: var(--accent); }
 .cal-cell.period { background: var(--period); color: #fff; }
-.cal-cell.predicted { background: var(--predicted); color: #7f1d1d; }
+.cal-cell.predicted { background: var(--predicted); color: #fff; }
 .cal-cell.fertile { background: var(--fertile); border-color: var(--accent); border-style: dashed; color: var(--ink); }
-.cal-cell.ovulation { background: var(--ovulation); color: #fff; }
+.cal-cell.ovulation { background: #fff; border-color: var(--ovulation); border-style: solid; color: var(--ink); }
+.cal-cell.ovulation .cal-mark { color: var(--ovulation); opacity: 1; font-size: 0.85rem; }
 .cal-cell.today { border-color: var(--ink); border-style: solid; }
 
 .cal-top { display: flex; justify-content: space-between; align-items: center; line-height: 1; }
@@ -195,16 +196,17 @@ input:focus { outline: none; border-color: var(--accent); }
 .cal-w { font-size: 0.72rem; font-weight: 700; text-align: center; margin-top: auto; }
 .cal-meals { display: flex; gap: 3px; justify-content: center; margin-top: 2px; }
 .cal-meals .md { width: 6px; height: 6px; border-radius: 50%; background: rgba(0,0,0,0.18); }
-.cal-cell.period .cal-meals .md, .cal-cell.ovulation .cal-meals .md { background: rgba(255,255,255,0.4); }
+.cal-cell.period .cal-meals .md { background: rgba(255,255,255,0.4); }
 .cal-meals .md.on { background: var(--green); }
-.cal-cell.period .cal-meals .md.on, .cal-cell.ovulation .cal-meals .md.on { background: #fff; }
+.cal-cell.period .cal-meals .md.on { background: #fff; }
 /* legend meal dot */
 .legend .md { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: middle; }
 .legend .heart-ic { color: var(--accent); font-style: normal; margin-right: 4px; }
+.legend .ov-ic { color: var(--ovulation); font-style: normal; margin-right: 5px; font-size: 1rem; vertical-align: middle; }
 
 /* 부부관계 하트 (달력 칸) */
 .cal-heart { color: var(--accent); font-size: 0.62rem; margin-left: 2px; }
-.cal-cell.period .cal-heart, .cal-cell.ovulation .cal-heart { color: #fff; }
+.cal-cell.period .cal-heart { color: #fff; }
 
 /* Day detail modal */
 .modal-backdrop {
@@ -244,7 +246,6 @@ input:focus { outline: none; border-color: var(--accent); }
 .dot.period { background: var(--period); }
 .dot.predicted { background: var(--predicted); }
 .dot.fertile { background: var(--fertile); border: 1.5px dashed var(--accent); }
-.dot.ovulation { background: var(--ovulation); }
 .dot.today { background: #fff; border: 2px solid var(--ink); }
 
 .predict { display: flex; flex-direction: column; gap: 10px; }
