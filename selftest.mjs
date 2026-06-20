@@ -113,6 +113,23 @@ await page.fill('#day-period-length', '5');
 await page.dispatchEvent('#day-period-length', 'change');
 await page.click('#day-modal-close');
 
+// 4-2) 중간 날(6/3)에서도 그 월경의 기간을 수정할 수 있어야 함
+await openDay('2026-06-03'); // 6/1~6/5 월경의 3일째
+const midRowVisible = await page.locator('#day-period-length-row:not([hidden])').count();
+check('월경 중간 날에서도 기간 입력란 표시', midRowVisible === 1);
+await page.fill('#day-period-length', '6');
+await page.dispatchEvent('#day-period-length', 'change');
+await page.click('#day-modal-close');
+const midEdited = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).periodLengths['2026-06-01']);
+check('중간 날 수정이 시작일(6/1) 기간에 반영', midEdited === 6, `periodLengths[6/1]=${midEdited}`);
+const day6cls = await page.getAttribute('.cal-cell[data-date="2026-06-06"]', 'class');
+check('기간 6일로 늘어 6/6이 월경일', day6cls.includes('period'), day6cls);
+// 원복(5일)
+await openDay('2026-06-03');
+await page.fill('#day-period-length', '5');
+await page.dispatchEvent('#day-period-length', 'change');
+await page.click('#day-modal-close');
+
 // 5) 추이 탭: 차트/통계 렌더
 await page.click('.tab[data-tab="trends"]');
 await page.waitForSelector('#tab-trends.active');

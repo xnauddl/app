@@ -182,6 +182,18 @@ function averagePeriodLength() {
   return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 }
 
+// 선택한 날짜가 속한 '기록된 월경'의 시작일(없으면 null).
+// 시작일이 아닌 중간 날을 눌러도 그 월경의 기간을 수정할 수 있게 한다.
+function recordedPeriodStartOf(iso) {
+  const t = fromISO(iso).getTime();
+  for (const s of db.periods) {
+    const start = fromISO(s).getTime();
+    const end = addDays(fromISO(s), periodLengthFor(s)).getTime(); // 끝 경계(미포함)
+    if (t >= start && t < end) return s;
+  }
+  return null;
+}
+
 /*
   핵심 계산:
   - 기록된 월경 시작일 + 미래 예측 시작일들을 만든다.
@@ -355,6 +367,7 @@ const dayCycleInfo = document.getElementById("day-cycle-info");
 const dayRelToggle = document.getElementById("day-rel-toggle");
 const dayRelInfo = document.getElementById("day-rel-info");
 let selectedDate = null;
+let editingPeriodStart = null; // 기간 입력란이 수정 중인 월경의 시작일
 
 function openDayModal(iso) {
   selectedDate = iso;
@@ -434,9 +447,19 @@ function updatePeriodToggle(iso) {
   dayPeriodToggle.classList.toggle("active", isStart);
   dayPeriodToggle.textContent = isStart ? "✓ 월경 시작일로 기록됨 (해제)" : "이 날을 월경 시작일로 기록";
 
-  // 시작일로 기록된 날에는 이번 월경 기간을 따로 정할 수 있게 표시
-  dayPeriodLengthRow.hidden = !isStart;
-  if (isStart) dayPeriodLength.value = periodLengthFor(iso);
+  // 시작일이든 중간 날이든, 이 날이 속한 월경의 기간을 수정할 수 있게 표시
+  const ownerStart = isStart ? iso : recordedPeriodStartOf(iso);
+  editingPeriodStart = ownerStart;
+  dayPeriodLengthRow.hidden = !ownerStart;
+  if (ownerStart) {
+    dayPeriodLength.value = periodLengthFor(ownerStart);
+    const labelSpan = dayPeriodLengthRow.querySelector("span");
+    if (labelSpan) {
+      labelSpan.textContent = isStart
+        ? "이번 월경 기간 (일)"
+        : `이 월경 기간 (${fmtKDate(ownerStart)} 시작) · 일`;
+    }
+  }
 
   const map = buildCycleMap();
   const type = map[iso];
@@ -466,12 +489,12 @@ dayPeriodToggle.addEventListener("click", () => {
   renderCalendarView();
 });
 
-/* 이번 월경 기간(일) 입력 */
+/* 이번 월경 기간(일) 입력 — 시작일 또는 중간 날 어디서든 수정 가능 */
 dayPeriodLength.addEventListener("change", () => {
-  if (!selectedDate || !db.periods.includes(selectedDate)) return;
+  if (!editingPeriodStart || !db.periods.includes(editingPeriodStart)) return;
   if (!db.periodLengths) db.periodLengths = {};
   const v = clampInt(dayPeriodLength.value, 1, 14, db.settings.periodLength);
-  db.periodLengths[selectedDate] = v;
+  db.periodLengths[editingPeriodStart] = v;
   dayPeriodLength.value = v;
   saveDB();
   updatePeriodToggle(selectedDate);
