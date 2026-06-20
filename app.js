@@ -621,13 +621,25 @@ function renderWeightStats() {
 
 function renderWeightChart() {
   const svg = document.getElementById("weight-chart");
+  const wrap = svg.parentElement; // .chart-wrap
   const data = sortedWeights();
   const W = 600, H = 260, pad = 36;
   svg.innerHTML = "";
+
+  // 빈 상태: SVG 텍스트(축소되어 작게 보임) 대신 다른 빈 상태와 동일한 .empty 문구 사용
+  const existingEmpty = wrap.querySelector(".empty");
   if (data.length === 0) {
-    svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#9ca3af" font-size="14">아직 몸무게 기록이 없습니다.</text>`;
+    svg.style.display = "none";
+    if (!existingEmpty) {
+      const p = document.createElement("p");
+      p.className = "empty";
+      p.textContent = "아직 몸무게 기록이 없어요. 달력에서 날짜를 눌러 입력해 보세요.";
+      wrap.appendChild(p);
+    }
     return;
   }
+  svg.style.display = "";
+  if (existingEmpty) existingEmpty.remove();
   const kgs = data.map((d) => d.kg);
   let min = Math.min(...kgs), max = Math.max(...kgs);
   if (min === max) { min -= 1; max += 1; } else { const m = (max - min) * 0.15; min -= m; max += m; }
