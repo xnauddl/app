@@ -164,6 +164,15 @@ input:focus { outline: none; border-color: var(--accent); }
 .switch input:checked + .slider { background: var(--green); }
 .switch input:checked + .slider::before { transform: translateX(20px); }
 
+/* 라벨이 붙은 토글 행 (예: 알림 켜기) */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);
+}
+.toggle-row-text { flex: 1; min-width: 0; }
+.toggle-row-title { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
+.toggle-row .hint { margin-top: 4px; }
+
 .meal-summary { display: flex; gap: 6px; }
 .meal-tag { font-size: 0.95rem; opacity: 0.3; }
 .meal-tag.on { opacity: 1; }

@@ -22,7 +22,8 @@
 
   <nav class="tabs" role="tablist">
     <button class="tab active" data-tab="calendar" role="tab">📅 달력</button>
-    <button class="tab" data-tab="trends" role="tab">📊 추이 · 기록</button>
+    <button class="tab" data-tab="trends" role="tab">📊 추이·기록</button>
+    <button class="tab" data-tab="settings" role="tab">⚙️ 설정</button>
   </nav>
 
   <main>
@@ -52,31 +53,18 @@
       </div>
 
       <div class="card">
-        <div class="card-head">
-          <h2>예측 요약</h2>
-          <label class="switch">
+        <h2>예측 요약</h2>
+        <div class="predict" id="cycle-predict"></div>
+        <div class="toggle-row">
+          <div class="toggle-row-text">
+            <div class="toggle-row-title">월경 예정일 알림</div>
+            <p class="hint" id="notify-hint">활성화하면 다음 월경 예정일에 브라우저 알림을 받아요.</p>
+          </div>
+          <label class="switch" aria-label="월경 예정일 알림 켜기">
             <input type="checkbox" id="notify-toggle" />
             <span class="slider"></span>
           </label>
         </div>
-        <div class="predict" id="cycle-predict"></div>
-        <p class="hint" id="notify-hint">알림을 활성화하면 다음 생리 예정일에 브라우저 알림을 받을 수 있어요.</p>
-      </div>
-
-      <div class="card">
-        <h2>주기 설정</h2>
-        <div class="row">
-          <label>
-            <span>평균 주기 (일)</span>
-            <input type="number" id="cycle-length" min="20" max="40" value="28" />
-          </label>
-          <label>
-            <span>기본 월경 기간 (일)</span>
-            <input type="number" id="period-length" min="2" max="10" value="5" />
-          </label>
-        </div>
-        <p class="hint">달마다 월경 기간이 다르면, 시작일을 기록한 뒤 끝나는 날을 달력에서 눌러 ‘월경 종료일’로 지정하세요. 위 값은 새 기록과 예측에 쓰이는 기본값이에요.</p>
-        <p class="hint" id="cycle-calc-hint"></p>
       </div>
     </section>
 
@@ -100,6 +88,25 @@
       <div class="card">
         <h2>최근 식사 기록</h2>
         <div class="list" id="meals-list"></div>
+      </div>
+    </section>
+
+    <!-- ===================== 설정 ===================== -->
+    <section id="tab-settings" class="tab-panel">
+      <div class="card">
+        <h2>주기 설정</h2>
+        <div class="row">
+          <label>
+            <span>평균 주기 (일)</span>
+            <input type="number" id="cycle-length" min="20" max="40" value="28" />
+          </label>
+          <label>
+            <span>기본 월경 기간 (일)</span>
+            <input type="number" id="period-length" min="2" max="10" value="5" />
+          </label>
+        </div>
+        <p class="hint">달마다 월경 기간이 다르면, 시작일을 기록한 뒤 끝나는 날을 달력에서 눌러 ‘월경 종료일’로 지정하세요. 위 값은 새 기록과 예측에 쓰이는 기본값이에요.</p>
+        <p class="hint" id="cycle-calc-hint"></p>
       </div>
 
       <div class="card" id="storage-card">

@@ -57,6 +57,7 @@ document.querySelectorAll(".tab").forEach((btn) => {
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
     if (btn.dataset.tab === "trends") renderTrends();
+    if (btn.dataset.tab === "settings") { renderSettings(); updateStorageStatus(); }
   });
 });
 
@@ -133,7 +134,7 @@ notifyToggle.addEventListener("change", () => {
     checkAndShowNotification();
   } else {
     localStorage.removeItem(NOTIFY_KEY);
-    notifyHint.textContent = "알림을 활성화하면 다음 생리 예정일에 브라우저 알림을 받을 수 있어요.";
+    notifyHint.textContent = "활성화하면 다음 월경 예정일에 브라우저 알림을 받아요.";
     notifyHint.style.color = "var(--muted)";
   }
 });
@@ -646,7 +647,10 @@ function renderMealsList() {
   }).join("");
 }
 
-function renderTrends() { renderWeightStats(); renderWeightChart(); renderWeightList(); renderMealsList(); renderBackupSummary(); }
+function renderTrends() { renderWeightStats(); renderWeightChart(); renderWeightList(); renderMealsList(); }
+
+/* 설정 탭: 백업 요약 등 */
+function renderSettings() { renderBackupSummary(); }
 
 /* ============================================================
    백업 · 복원
@@ -781,7 +785,7 @@ if ("launchQueue" in window && typeof LaunchParams !== "undefined" && "files" in
       const file = await fileHandle.getFile();
       const text = await file.text();
       // 추이·기록 탭으로 전환 후 복원
-      document.querySelector('.tab[data-tab="trends"]').click();
+      document.querySelector('.tab[data-tab="settings"]').click();
       restoreFromText(text);
     } catch (e) {
       console.log("파일 열기 실패:", e);
@@ -800,7 +804,7 @@ if ("launchQueue" in window && typeof LaunchParams !== "undefined" && "files" in
     if (res) {
       const text = await res.text();
       await cache.delete("shared-data");
-      document.querySelector('.tab[data-tab="trends"]').click();
+      document.querySelector('.tab[data-tab="settings"]').click();
       restoreFromText(text);
     }
   } catch (e) {
@@ -817,6 +821,7 @@ function initAll() {
   calView = new Date(); calView.setDate(1);
   renderCalendarView();
   renderTrends();
+  renderSettings();
 }
 initAll();
 

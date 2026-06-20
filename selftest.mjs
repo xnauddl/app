@@ -152,9 +152,9 @@ const persisted = await page.evaluate(() => {
 });
 check('새로고침 후 데이터 유지', persisted.w === 58.4 && persisted.periods === 2, JSON.stringify(persisted));
 
-// 8) 백업 · 복원
-await page.click('.tab[data-tab="trends"]');
-await page.waitForSelector('#tab-trends.active');
+// 8) 백업 · 복원 (설정 탭)
+await page.click('.tab[data-tab="settings"]');
+await page.waitForSelector('#tab-settings.active');
 const summaryText = await page.textContent('#backup-summary');
 check('백업 요약 칩 표시', summaryText.includes('몸무게') && summaryText.includes('부부관계'), summaryText.replace(/\s+/g, ' ').trim());
 
