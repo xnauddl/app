@@ -114,6 +114,17 @@ input:focus { outline: none; border-color: var(--accent); }
   transition: filter 0.15s ease;
 }
 .btn:hover { filter: brightness(0.96); }
+
+/* 키보드 포커스 가시화 (접근성) */
+.tab:focus-visible,
+.btn:focus-visible,
+.modal-close:focus-visible,
+.switch input:focus-visible + .slider,
+.cal-cell:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .btn.primary { background: var(--accent); color: #fff; }
 .btn.ghost { background: var(--surface-soft); color: var(--ink); padding: 8px 14px; font-size: 1.2rem; }
 .btn.link { background: none; color: var(--ink); text-decoration: underline; padding: 4px; }
@@ -197,6 +208,7 @@ input:focus { outline: none; border-color: var(--accent); }
 .cal-cell.fertile { background: var(--fertile); border-color: var(--accent); border-style: dashed; color: var(--ink); }
 .cal-cell.ovulation { background: #fff; border-color: var(--ovulation); border-style: solid; color: var(--ink); }
 .cal-cell.ovulation .cal-mark { color: var(--ovulation); opacity: 1; font-size: 0.85rem; }
+.cal-cell.fertile .cal-mark { color: var(--accent); opacity: 1; font-size: 0.8rem; }
 .cal-cell.today { border-color: var(--ink); border-style: solid; }
 
 .cal-top { display: flex; justify-content: space-between; align-items: center; line-height: 1; }
@@ -232,7 +244,7 @@ input:focus { outline: none; border-color: var(--accent); }
 @keyframes slideup { from { transform: translateY(40px); opacity: 0.6; } to { transform: none; opacity: 1; } }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .modal-head h2 { margin: 0; }
-.modal-close { border: none; background: #f3f4f6; width: 34px; height: 34px; border-radius: 50%; font-size: 1rem; cursor: pointer; color: var(--muted); }
+.modal-close { border: none; background: #f3f4f6; width: 44px; height: 44px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; color: var(--muted); }
 .modal-body { display: flex; flex-direction: column; gap: 20px; }
 .field { display: flex; flex-direction: column; gap: 10px; }
 .field-label { font-weight: 700; color: var(--ink); font-size: 0.95rem; }

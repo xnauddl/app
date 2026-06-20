@@ -52,9 +52,13 @@ const MEAL_EMOJI = { breakfast: "🌅", lunch: "☀️", dinner: "🌙" };
 /* ---------- 탭 전환 ---------- */
 document.querySelectorAll(".tab").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach((b) => {
+      b.classList.remove("active");
+      b.setAttribute("aria-selected", "false");
+    });
     document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
     btn.classList.add("active");
+    btn.setAttribute("aria-selected", "true");
     document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
     if (btn.dataset.tab === "trends") renderTrends();
     if (btn.dataset.tab === "settings") { renderSettings(); updateStorageStatus(); }
@@ -277,7 +281,7 @@ function clampInt(v, lo, hi, dflt) {
 document.getElementById("cal-prev").addEventListener("click", () => { calView.setMonth(calView.getMonth() - 1); renderCalendar(); });
 document.getElementById("cal-next").addEventListener("click", () => { calView.setMonth(calView.getMonth() + 1); renderCalendar(); });
 
-const CYCLE_MARK = { period: "🩸", predicted: "🩸", ovulation: "✦", fertile: "" };
+const CYCLE_MARK = { period: "🩸", predicted: "🩸", ovulation: "✦", fertile: "•" };
 
 function mealsDotsHtml(iso) {
   const m = db.meals[iso];
@@ -298,6 +302,8 @@ function renderCalendar() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = todayISO();
 
+  const STATE_LABEL = { period: "월경", predicted: "예상 월경", fertile: "가임기", ovulation: "배란일" };
+
   let html = "";
   for (let i = 0; i < firstDay; i++) html += `<div class="cal-cell empty-cell"></div>`;
   for (let day = 1; day <= daysInMonth; day++) {
@@ -308,7 +314,17 @@ function renderCalendar() {
     const heart = db.relations[iso] ? `<span class="cal-heart">❤</span>` : "";
     const w = db.weights[iso];
     const weightHtml = w != null ? `<span class="cal-w">${w}</span>` : "";
-    html += `<div class="cal-cell ${type} ${isToday ? "today" : ""}" data-date="${iso}">
+
+    // 스크린리더용 설명: 날짜·요일·주기상태·기록 요약
+    const wd = "일월화수목금토"[new Date(year, month, day).getDay()] + "요일";
+    const labelParts = [`${month + 1}월 ${day}일`, wd];
+    if (STATE_LABEL[type]) labelParts.push(STATE_LABEL[type]);
+    if (db.relations[iso]) labelParts.push("부부관계 기록");
+    if (w != null) labelParts.push(`몸무게 ${w}kg`);
+    if (isToday) labelParts.push("오늘");
+    const aria = labelParts.join(", ");
+
+    html += `<div class="cal-cell ${type} ${isToday ? "today" : ""}" data-date="${iso}" role="button" tabindex="0" aria-label="${aria}">
       <span class="cal-top"><span class="cal-day">${day}</span><span class="cal-mark">${mark}${heart}</span></span>
       ${weightHtml}
       ${mealsDotsHtml(iso)}
@@ -316,9 +332,15 @@ function renderCalendar() {
   }
   grid.innerHTML = html;
 
-  grid.querySelectorAll(".cal-cell[data-date]").forEach((cell) =>
-    cell.addEventListener("click", () => openDayModal(cell.dataset.date))
-  );
+  grid.querySelectorAll(".cal-cell[data-date]").forEach((cell) => {
+    cell.addEventListener("click", () => openDayModal(cell.dataset.date));
+    cell.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openDayModal(cell.dataset.date);
+      }
+    });
+  });
 }
 
 function renderPredict() {
@@ -370,9 +392,11 @@ const dayRelToggle = document.getElementById("day-rel-toggle");
 const dayRelInfo = document.getElementById("day-rel-info");
 let selectedDate = null;
 let editingPeriodStart = null; // 기간 입력란이 수정 중인 월경의 시작일
+let lastFocusedBeforeModal = null; // 모달 닫을 때 포커스 복원용
 
 function openDayModal(iso) {
   selectedDate = iso;
+  lastFocusedBeforeModal = document.activeElement; // 닫을 때 돌려줄 포커스 기억
   document.getElementById("day-modal-title").textContent = fmtKDate(iso);
 
   // 몸무게
@@ -393,12 +417,42 @@ function openDayModal(iso) {
   updateRelToggle(iso);
 
   dayModal.hidden = false;
+  // 포커스를 모달 안(닫기 버튼)으로 이동 — 스크린리더/키보드 접근성
+  document.getElementById("day-modal-close").focus();
 }
 
-function closeDayModal() { dayModal.hidden = true; selectedDate = null; }
+function closeDayModal() {
+  const iso = selectedDate;
+  dayModal.hidden = true;
+  selectedDate = null;
+  // 포커스 복원: 달력이 다시 그려졌을 수 있으니 같은 날짜 칸을 찾아 포커스,
+  // 없으면 직전 포커스 요소(여전히 문서에 있을 때)로 되돌림
+  let target = iso ? document.querySelector(`.cal-cell[data-date="${iso}"]`) : null;
+  if (!target && lastFocusedBeforeModal && document.contains(lastFocusedBeforeModal)) {
+    target = lastFocusedBeforeModal;
+  }
+  if (target && typeof target.focus === "function") target.focus();
+  lastFocusedBeforeModal = null;
+}
 document.getElementById("day-modal-close").addEventListener("click", closeDayModal);
 dayModal.addEventListener("click", (e) => { if (e.target === dayModal) closeDayModal(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !dayModal.hidden) closeDayModal(); });
+
+// 포커스 트랩: 모달이 열린 동안 Tab 이동을 모달 안에 가둠
+dayModal.addEventListener("keydown", (e) => {
+  if (e.key !== "Tab") return;
+  const focusables = dayModal.querySelectorAll(
+    'button, input:not([type="hidden"]), select, textarea, [href], [tabindex]:not([tabindex="-1"])'
+  );
+  const list = Array.from(focusables).filter((el) => !el.disabled && el.offsetParent !== null);
+  if (list.length === 0) return;
+  const first = list[0], last = list[list.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault(); last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault(); first.focus();
+  }
+});
 
 /* 몸무게 입력 */
 dayWeight.addEventListener("change", () => {

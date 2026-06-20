@@ -20,15 +20,15 @@
     <p class="subtitle">달력 한 곳에서 몸무게 · 식사 · 월경까지</p>
   </header>
 
-  <nav class="tabs" role="tablist">
-    <button class="tab active" data-tab="calendar" role="tab">📅 달력</button>
-    <button class="tab" data-tab="trends" role="tab">📊 추이·기록</button>
-    <button class="tab" data-tab="settings" role="tab">⚙️ 설정</button>
+  <nav class="tabs" role="tablist" aria-label="화면 전환">
+    <button class="tab active" data-tab="calendar" role="tab" id="tab-btn-calendar" aria-controls="tab-calendar" aria-selected="true">📅 달력</button>
+    <button class="tab" data-tab="trends" role="tab" id="tab-btn-trends" aria-controls="tab-trends" aria-selected="false">📊 추이·기록</button>
+    <button class="tab" data-tab="settings" role="tab" id="tab-btn-settings" aria-controls="tab-settings" aria-selected="false">⚙️ 설정</button>
   </nav>
 
   <main>
     <!-- ===================== 달력 (홈) ===================== -->
-    <section id="tab-calendar" class="tab-panel active">
+    <section id="tab-calendar" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-calendar" tabindex="0">
       <div class="card">
         <div class="cal-head">
           <button class="btn ghost" id="cal-prev">‹</button>
@@ -69,7 +69,7 @@
     </section>
 
     <!-- ===================== 추이 · 기록 ===================== -->
-    <section id="tab-trends" class="tab-panel">
+    <section id="tab-trends" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-trends" tabindex="0">
       <div class="card">
         <div class="card-head">
           <h2>몸무게 추이</h2>
@@ -92,7 +92,7 @@
     </section>
 
     <!-- ===================== 설정 ===================== -->
-    <section id="tab-settings" class="tab-panel">
+    <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-settings" tabindex="0">
       <div class="card">
         <h2>주기 설정</h2>
         <div class="row">
@@ -132,7 +132,7 @@
 
   <!-- ===================== 날짜 상세 모달 ===================== -->
   <div class="modal-backdrop" id="day-modal" hidden>
-    <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="day-modal-title">
       <div class="modal-head">
         <h2 id="day-modal-title">날짜</h2>
         <button class="modal-close" id="day-modal-close" aria-label="닫기">✕</button>
