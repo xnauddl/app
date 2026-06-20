@@ -144,6 +144,22 @@ await page.click('#day-modal-close');
 const cyc = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).settings.cycleLength);
 check('월경 2회 기록 후 평균 주기 자동 계산(28)', cyc === 28, `cycleLength=${cyc}`);
 
+// 6-1) 평균 주기를 직접 설정하면 자동 평균이 덮어쓰지 않음 (설정 탭의 입력)
+await page.click('.tab[data-tab="settings"]');
+await page.waitForSelector('#tab-settings.active');
+await page.fill('#cycle-length', '33');
+await page.dispatchEvent('#cycle-length', 'change');
+const manualFlag = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).settings.cycleManual);
+check('주기 직접 설정 시 수동 플래그 ON', manualFlag === true, `cycleManual=${manualFlag}`);
+// 월경 토글로 자동 평균 경로를 다시 타도 33 유지되어야 함
+await page.click('.tab[data-tab="calendar"]');
+await openDay('2026-06-29');
+await page.click('#day-period-toggle'); // 해제
+await page.click('#day-period-toggle'); // 재기록 → averageCycle 경로 실행
+await page.click('#day-modal-close');
+const keptCycle = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).settings.cycleLength);
+check('수동 설정값(33)이 자동 평균으로 덮어쓰이지 않음', keptCycle === 33, `cycleLength=${keptCycle}`);
+
 // 7) 새로고침 후 데이터 영속성
 await page.reload();
 const persisted = await page.evaluate(() => {

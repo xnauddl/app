@@ -12,7 +12,7 @@ const defaultData = () => ({
   periods: [],               // [ "YYYY-MM-DD", ... ] 월경 시작일 목록
   periodLengths: {},         // { 시작일ISO: 일수 } 월경별 실제 기간(달마다 다름)
   relations: {},             // { "YYYY-MM-DD": true } 부부관계 있은 날
-  settings: { cycleLength: 28, periodLength: 5 },
+  settings: { cycleLength: 28, periodLength: 5, cycleManual: false },
 });
 
 function loadDB() {
@@ -134,7 +134,7 @@ notifyToggle.addEventListener("change", () => {
     }
     localStorage.setItem(NOTIFY_KEY, "1");
     notifyHint.textContent = "✓ 알림이 활성화되었습니다.";
-    notifyHint.style.color = "var(--green)";
+    notifyHint.style.color = "var(--ink)";
     checkAndShowNotification();
   } else {
     localStorage.removeItem(NOTIFY_KEY);
@@ -264,6 +264,7 @@ periodLengthInput.value = db.settings.periodLength;
 
 cycleLengthInput.addEventListener("change", () => {
   db.settings.cycleLength = clampInt(cycleLengthInput.value, 20, 40, 28);
+  db.settings.cycleManual = true; // 직접 설정 시 기록 평균 자동 덮어쓰기 중단
   cycleLengthInput.value = db.settings.cycleLength;
   saveDB(); renderCalendarView();
 });
@@ -347,9 +348,13 @@ function renderPredict() {
   const box = document.getElementById("cycle-predict");
   const hint = document.getElementById("cycle-calc-hint");
   const avg = averageCycle();
-  hint.textContent = avg
-    ? `기록을 바탕으로 계산된 평균 주기: 약 ${avg}일 (자동 반영됨)`
-    : "월경 시작일을 2회 이상 기록하면 평균 주기를 자동 계산합니다.";
+  if (!avg) {
+    hint.textContent = "월경 시작일을 2회 이상 기록하면 평균 주기를 자동 계산해요.";
+  } else if (db.settings.cycleManual) {
+    hint.textContent = `기록 평균은 약 ${avg}일이에요. (지금은 직접 설정한 ${db.settings.cycleLength}일 사용 중)`;
+  } else {
+    hint.textContent = `기록을 바탕으로 평균 주기를 약 ${avg}일로 자동 설정했어요.`;
+  }
 
   if (db.periods.length === 0) {
     box.innerHTML = `<p class="empty">달력에서 날짜를 눌러 월경 시작일을 기록해 보세요.</p>`;
@@ -540,8 +545,9 @@ dayPeriodToggle.addEventListener("click", () => {
     db.periodLengths[selectedDate] = averagePeriodLength();
   }
 
+  // 사용자가 직접 설정하지 않았을 때만 기록 평균을 자동 반영
   const avg = averageCycle();
-  if (avg) { db.settings.cycleLength = avg; cycleLengthInput.value = avg; }
+  if (avg && !db.settings.cycleManual) { db.settings.cycleLength = avg; cycleLengthInput.value = avg; }
 
   saveDB();
   updatePeriodToggle(selectedDate);
@@ -783,6 +789,7 @@ function normalizeBackup(parsed) {
   if (raw.settings && typeof raw.settings === "object") {
     out.settings.cycleLength = clampInt(raw.settings.cycleLength, 20, 40, 28);
     out.settings.periodLength = clampInt(raw.settings.periodLength, 2, 10, 5);
+    out.settings.cycleManual = !!raw.settings.cycleManual;
   }
   return out;
 }
