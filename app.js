@@ -104,9 +104,9 @@ function checkAndShowNotification() {
 
   if (today === notifyDate || today === nextISO) {
     const msg = today === nextISO ? "다음 생리 예정일입니다!" : `다음 생리 예정일까지 ${notifyDaysAhead}일 남았어요.`;
-    new Notification("🌸 건강 다이어리", {
+    new Notification("건강 다이어리", {
       body: msg,
-      icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🌸</text></svg>",
+      icon: "icon-192.png",
       tag: "period-reminder",
     });
     localStorage.setItem(shownKey, "1");
@@ -578,7 +578,7 @@ function renderWeightChart() {
   for (let g = 0; g <= 3; g++) {
     const gy = pad + (g * (H - 2 * pad)) / 3;
     const gv = (max - (g * (max - min)) / 3).toFixed(1);
-    grid += `<line x1="${pad}" y1="${gy}" x2="${W - pad}" y2="${gy}" stroke="#f1d4e5" stroke-width="1"/>`;
+    grid += `<line x1="${pad}" y1="${gy}" x2="${W - pad}" y2="${gy}" stroke="#e5e7eb" stroke-width="1"/>`;
     grid += `<text x="${pad - 6}" y="${gy + 4}" text-anchor="end" fill="#9ca3af" font-size="10">${gv}</text>`;
   }
 

@@ -4,15 +4,23 @@
   --ink: #000000;
   --muted: #6b7280;
   --line: #e5e7eb;
-  --pink: #dc2626;
-  --pink-dark: #000000;
-  --pink-soft: #f5f5f5;
+
+  /* 포인트 컬러: 레드 (단일 톤으로 통일) */
+  --accent: #dc2626;
+  --accent-strong: #b91c1c;
+  --accent-weak: #fecaca;
+  --surface-soft: #f5f5f5;
+
+  /* 보조 색 (식사 완료=초록, 토요일=파랑) */
   --blue: #3b82f6;
   --green: #10b981;
-  --period: #ef4444;
-  --predicted: #fca5a5;
-  --fertile: #bbf7d0;
-  --ovulation: #8b5cf6;
+
+  /* 주기 상태 색 (흑·백·레드 스케일) */
+  --period: #dc2626;       /* 월경: 진한 레드 */
+  --predicted: #fca5a5;    /* 예상 월경: 연한 레드 */
+  --fertile: #fff5f5;      /* 가임기: 아주 연한 레드 + 레드 점선 테두리 */
+  --ovulation: #111827;    /* 배란일: 블랙(핵심 하루) */
+
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   --radius: 16px;
 }
@@ -33,7 +41,7 @@ body {
   text-align: center;
   padding: 28px 16px 12px;
 }
-.app-header h1 { margin: 0; font-size: 1.6rem; color: var(--pink-dark); }
+.app-header h1 { margin: 0; font-size: 1.6rem; color: var(--ink); }
 .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
 
 main { max-width: 720px; margin: 0 auto; padding: 12px 16px 40px; }
@@ -63,7 +71,7 @@ main { max-width: 720px; margin: 0 auto; padding: 12px 16px 40px; }
   box-shadow: var(--shadow);
   transition: all 0.15s ease;
 }
-.tab.active { background: var(--pink); color: #fff; }
+.tab.active { background: var(--accent); color: #fff; }
 
 .tab-panel { display: none; animation: fade 0.25s ease; }
 .tab-panel.active { display: block; }
@@ -94,7 +102,7 @@ input[type="date"], input[type="number"], input[type="text"] {
   background: #fff;
   width: 100%;
 }
-input:focus { outline: none; border-color: var(--pink); }
+input:focus { outline: none; border-color: var(--accent); }
 
 .btn {
   border: none;
@@ -106,9 +114,9 @@ input:focus { outline: none; border-color: var(--pink); }
   transition: filter 0.15s ease;
 }
 .btn:hover { filter: brightness(0.96); }
-.btn.primary { background: var(--pink); color: #fff; }
-.btn.ghost { background: var(--pink-soft); color: var(--pink-dark); padding: 8px 14px; font-size: 1.2rem; }
-.btn.link { background: none; color: var(--pink-dark); text-decoration: underline; padding: 4px; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.ghost { background: var(--surface-soft); color: var(--ink); padding: 8px 14px; font-size: 1.2rem; }
+.btn.link { background: none; color: var(--ink); text-decoration: underline; padding: 4px; }
 .btn.danger { background: #fee2e2; color: #b91c1c; padding: 6px 10px; font-size: 0.8rem; }
 
 .hint { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
@@ -174,12 +182,12 @@ input:focus { outline: none; border-color: var(--pink); }
   transition: all 0.12s; overflow: hidden;
 }
 .cal-cell.empty-cell { background: transparent; cursor: default; }
-.cal-cell:not(.empty-cell):hover { border-color: var(--pink); }
+.cal-cell:not(.empty-cell):hover { border-color: var(--accent); }
 .cal-cell.period { background: var(--period); color: #fff; }
 .cal-cell.predicted { background: var(--predicted); color: #7f1d1d; }
-.cal-cell.fertile { background: var(--fertile); color: #065f46; }
+.cal-cell.fertile { background: var(--fertile); border-color: var(--accent); border-style: dashed; color: var(--ink); }
 .cal-cell.ovulation { background: var(--ovulation); color: #fff; }
-.cal-cell.today { border-color: var(--ink); }
+.cal-cell.today { border-color: var(--ink); border-style: solid; }
 
 .cal-top { display: flex; justify-content: space-between; align-items: center; line-height: 1; }
 .cal-day { font-size: 0.82rem; font-weight: 600; }
@@ -192,10 +200,10 @@ input:focus { outline: none; border-color: var(--pink); }
 .cal-cell.period .cal-meals .md.on, .cal-cell.ovulation .cal-meals .md.on { background: #fff; }
 /* legend meal dot */
 .legend .md { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: middle; }
-.legend .heart-ic { color: #e11d48; font-style: normal; margin-right: 4px; }
+.legend .heart-ic { color: var(--accent); font-style: normal; margin-right: 4px; }
 
 /* 부부관계 하트 (달력 칸) */
-.cal-heart { color: #e11d48; font-size: 0.62rem; margin-left: 2px; }
+.cal-heart { color: var(--accent); font-size: 0.62rem; margin-left: 2px; }
 .cal-cell.period .cal-heart, .cal-cell.ovulation .cal-heart { color: #fff; }
 
 /* Day detail modal */
@@ -218,13 +226,13 @@ input:focus { outline: none; border-color: var(--pink); }
 .field { display: flex; flex-direction: column; gap: 10px; }
 .field-label { font-weight: 700; color: var(--ink); font-size: 0.95rem; }
 .btn.small { padding: 8px 12px; font-size: 0.85rem; }
-.btn.period-btn { background: var(--pink-soft); color: var(--pink-dark); width: 100%; }
+.btn.period-btn { background: var(--surface-soft); color: var(--ink); width: 100%; }
 .btn.period-btn.active { background: var(--period); color: #fff; }
-.btn.period-end-btn { background: var(--pink-soft); color: var(--pink-dark); width: 100%; margin-top: 8px; }
+.btn.period-end-btn { background: var(--surface-soft); color: var(--ink); width: 100%; margin-top: 8px; }
 .btn.period-end-btn.active { background: var(--period); color: #fff; }
 .btn[hidden] { display: none; }
-.btn.rel-btn { background: #ffe4ec; color: #be185d; width: 100%; }
-.btn.rel-btn.active { background: #e11d48; color: #fff; }
+.btn.rel-btn { background: var(--surface-soft); color: var(--ink); width: 100%; }
+.btn.rel-btn.active { background: var(--accent); color: #fff; }
 
 @media (min-width: 600px) {
   .modal-backdrop { align-items: center; }
@@ -235,13 +243,13 @@ input:focus { outline: none; border-color: var(--pink); }
 .legend i.dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; vertical-align: middle; }
 .dot.period { background: var(--period); }
 .dot.predicted { background: var(--predicted); }
-.dot.fertile { background: var(--fertile); }
+.dot.fertile { background: var(--fertile); border: 1.5px dashed var(--accent); }
 .dot.ovulation { background: var(--ovulation); }
 .dot.today { background: #fff; border: 2px solid var(--ink); }
 
 .predict { display: flex; flex-direction: column; gap: 10px; }
-.predict-item { display: flex; justify-content: space-between; padding: 10px 12px; background: var(--pink-soft); border-radius: 10px; font-size: 0.9rem; }
-.predict-item b { color: var(--pink-dark); }
+.predict-item { display: flex; justify-content: space-between; padding: 10px 12px; background: var(--surface-soft); border-radius: 10px; font-size: 0.9rem; }
+.predict-item b { color: var(--ink); }
 
 /* Storage protection */
 .storage-status { font-size: 0.9rem; line-height: 1.6; padding: 12px; border-radius: 10px; }
@@ -252,7 +260,7 @@ input:focus { outline: none; border-color: var(--pink); }
 /* Backup */
 .backup-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
 .backup-summary .bchip {
-  background: var(--pink-soft); color: var(--pink-dark); border-radius: 10px;
+  background: var(--surface-soft); color: var(--ink); border-radius: 10px;
   padding: 8px 12px; font-size: 0.82rem; font-weight: 600;
 }
 .backup-summary .bchip b { font-size: 1rem; }
