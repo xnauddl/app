@@ -291,9 +291,6 @@ input:focus-visible {
 #backup-status.ok { color: var(--green); }
 #backup-status.warn { color: var(--period); }
 
-/* Footer */
-.app-footer { text-align: center; padding: 16px; color: var(--muted); font-size: 0.8rem; display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
-
 @media (max-width: 480px) {
   .stats { width: 100%; justify-content: space-between; }
   .btn.primary { width: 100%; }

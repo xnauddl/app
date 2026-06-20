@@ -108,7 +108,7 @@ function checkAndShowNotification() {
   if (localStorage.getItem(shownKey)) return;
 
   if (today === notifyDate || today === nextISO) {
-    const msg = today === nextISO ? "다음 생리 예정일입니다!" : `다음 생리 예정일까지 ${notifyDaysAhead}일 남았어요.`;
+    const msg = today === nextISO ? "다음 월경 예정일입니다!" : `다음 월경 예정일까지 ${notifyDaysAhead}일 남았어요.`;
     new Notification("건강 다이어리", {
       body: msg,
       icon: "icon-192.png",
@@ -203,7 +203,7 @@ function periodOwnerFor(iso) {
 /*
   핵심 계산:
   - 기록된 월경 시작일 + 미래 예측 시작일들을 만든다.
-  - 각 주기마다 "다음 생리 예정일 - 14일" = 배란일
+  - 각 주기마다 "다음 월경 예정일 - 14일" = 배란일
   - 가임기 = 배란일 -5일 ~ 배란일 +3일
   반환: 날짜(ISO) -> 분류 맵
 */
@@ -239,7 +239,7 @@ function buildCycleMap() {
 
   for (let i = 0; i < starts.length - 1; i++) {
     const nextStart = fromISO(starts[i + 1]);
-    const ovulation = addDays(nextStart, -14);      // 배란일: 다음 생리 예정일 - 14일
+    const ovulation = addDays(nextStart, -14);      // 배란일: 다음 월경 예정일 - 14일
     for (let d = -5; d <= 3; d++) {                  // 가임기: 배란일 -5 ~ +3
       const iso = toISO(addDays(ovulation, d));
       if (map[iso] === "period" || map[iso] === "predicted") continue;
