@@ -10,6 +10,7 @@ const defaultData = () => ({
   weights: {},               // { "YYYY-MM-DD": number }
   meals: {},                 // { "YYYY-MM-DD": { breakfast:{eaten,text}, lunch:{...}, dinner:{...} } }
   periods: [],               // [ "YYYY-MM-DD", ... ] 월경 시작일 목록
+  periodLengths: {},         // { 시작일ISO: 일수 } 월경별 실제 기간(달마다 다름)
   relations: {},             // { "YYYY-MM-DD": true } 부부관계 있은 날
   settings: { cycleLength: 28, periodLength: 5 },
 });
@@ -166,6 +167,21 @@ function averageCycle() {
   return count ? Math.round(sum / count) : null;
 }
 
+// 특정 월경(시작일)의 실제 기간. 따로 기록이 없으면 기본 설정값으로.
+function periodLengthFor(startISO) {
+  const v = db.periodLengths ? db.periodLengths[startISO] : undefined;
+  return Number.isFinite(v) && v >= 1 && v <= 14 ? v : db.settings.periodLength;
+}
+
+// 기록된 월경 기간들의 평균(미래 예측에 사용). 기록 없으면 기본값.
+function averagePeriodLength() {
+  const vals = db.periods
+    .map((s) => db.periodLengths && db.periodLengths[s])
+    .filter((n) => Number.isFinite(n) && n >= 1 && n <= 14);
+  if (vals.length === 0) return db.settings.periodLength;
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+}
+
 /*
   핵심 계산:
   - 기록된 월경 시작일 + 미래 예측 시작일들을 만든다.
@@ -175,8 +191,9 @@ function averageCycle() {
 */
 function buildCycleMap() {
   const cycle = db.settings.cycleLength;
-  const plen = db.settings.periodLength;
   const recorded = [...db.periods].sort();
+  const recordedSet = new Set(recorded);
+  const avgPlen = averagePeriodLength();
 
   const starts = recorded.slice();
   if (recorded.length > 0) {
@@ -188,12 +205,13 @@ function buildCycleMap() {
   }
   starts.sort();
 
-  const recordedSet = new Set(recorded);
   const map = {}; // iso -> "period" | "predicted" | "fertile" | "ovulation"
   const set = (iso, type) => { map[iso] = type; };
 
   starts.forEach((s) => {
     const isRecorded = recordedSet.has(s);
+    // 기록된 월경은 그 달의 실제 기간, 예측은 평균 기간 사용
+    const plen = isRecorded ? periodLengthFor(s) : avgPlen;
     for (let d = 0; d < plen; d++) {
       const iso = toISO(addDays(fromISO(s), d));
       if (map[iso] === "period") continue;
@@ -331,6 +349,8 @@ function renderCalendarView() {
 const dayModal = document.getElementById("day-modal");
 const dayWeight = document.getElementById("day-weight");
 const dayPeriodToggle = document.getElementById("day-period-toggle");
+const dayPeriodLengthRow = document.getElementById("day-period-length-row");
+const dayPeriodLength = document.getElementById("day-period-length");
 const dayCycleInfo = document.getElementById("day-cycle-info");
 const dayRelToggle = document.getElementById("day-rel-toggle");
 const dayRelInfo = document.getElementById("day-rel-info");
@@ -414,6 +434,10 @@ function updatePeriodToggle(iso) {
   dayPeriodToggle.classList.toggle("active", isStart);
   dayPeriodToggle.textContent = isStart ? "✓ 월경 시작일로 기록됨 (해제)" : "이 날을 월경 시작일로 기록";
 
+  // 시작일로 기록된 날에는 이번 월경 기간을 따로 정할 수 있게 표시
+  dayPeriodLengthRow.hidden = !isStart;
+  if (isStart) dayPeriodLength.value = periodLengthFor(iso);
+
   const map = buildCycleMap();
   const type = map[iso];
   const desc = { period: "월경일", predicted: "예상 월경일", fertile: "가임기", ovulation: "배란일" }[type];
@@ -422,9 +446,16 @@ function updatePeriodToggle(iso) {
 
 dayPeriodToggle.addEventListener("click", () => {
   if (!selectedDate) return;
+  if (!db.periodLengths) db.periodLengths = {};
   const idx = db.periods.indexOf(selectedDate);
-  if (idx >= 0) db.periods.splice(idx, 1);
-  else { db.periods.push(selectedDate); db.periods.sort(); }
+  if (idx >= 0) {
+    db.periods.splice(idx, 1);
+    delete db.periodLengths[selectedDate];
+  } else {
+    db.periods.push(selectedDate); db.periods.sort();
+    // 새 기록은 평균(없으면 기본값) 기간으로 시작 — 이후 모달에서 수정 가능
+    db.periodLengths[selectedDate] = averagePeriodLength();
+  }
 
   const avg = averageCycle();
   if (avg) { db.settings.cycleLength = avg; cycleLengthInput.value = avg; }
@@ -432,6 +463,18 @@ dayPeriodToggle.addEventListener("click", () => {
   saveDB();
   updatePeriodToggle(selectedDate);
   updateRelToggle(selectedDate);
+  renderCalendarView();
+});
+
+/* 이번 월경 기간(일) 입력 */
+dayPeriodLength.addEventListener("change", () => {
+  if (!selectedDate || !db.periods.includes(selectedDate)) return;
+  if (!db.periodLengths) db.periodLengths = {};
+  const v = clampInt(dayPeriodLength.value, 1, 14, db.settings.periodLength);
+  db.periodLengths[selectedDate] = v;
+  dayPeriodLength.value = v;
+  saveDB();
+  updatePeriodToggle(selectedDate);
   renderCalendarView();
 });
 
@@ -640,6 +683,14 @@ function normalizeBackup(parsed) {
   if (raw.weights && typeof raw.weights === "object") out.weights = raw.weights;
   if (raw.meals && typeof raw.meals === "object") out.meals = raw.meals;
   if (Array.isArray(raw.periods)) out.periods = raw.periods.slice().sort();
+  if (raw.periodLengths && typeof raw.periodLengths === "object") {
+    const pl = {};
+    for (const [k, v] of Object.entries(raw.periodLengths)) {
+      const n = parseInt(v, 10);
+      if (Number.isFinite(n) && n >= 1 && n <= 14) pl[k] = n;
+    }
+    out.periodLengths = pl;
+  }
   if (raw.relations && typeof raw.relations === "object") out.relations = raw.relations;
   if (raw.settings && typeof raw.settings === "object") {
     out.settings.cycleLength = clampInt(raw.settings.cycleLength, 20, 40, 28);

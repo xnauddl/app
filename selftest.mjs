@@ -95,6 +95,24 @@ check('6/1 셀이 월경(period) 표시', periodClass.includes('period'), period
 const fertileClass = await page.getAttribute('.cal-cell[data-date="2026-06-11"]', 'class');
 check('6/11 셀이 가임기(fertile) 표시', fertileClass.includes('fertile'), fertileClass);
 
+// 4-1) 월경별 가변 기간: 6/1 월경을 7일로 변경 → 6/7 이 월경일이 됨(기본 5일이면 아님)
+const before7 = await page.getAttribute('.cal-cell[data-date="2026-06-07"]', 'class');
+check('가변 기간 변경 전 6/7은 월경 아님', !before7.includes('period'), before7);
+await openDay('2026-06-01');
+await page.waitForSelector('#day-period-length-row:not([hidden])');
+await page.fill('#day-period-length', '7');
+await page.dispatchEvent('#day-period-length', 'change');
+await page.click('#day-modal-close');
+const plenStored = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).periodLengths['2026-06-01']);
+check('이번 월경 기간 7일 저장', plenStored === 7, `periodLengths[6/1]=${plenStored}`);
+const after7 = await page.getAttribute('.cal-cell[data-date="2026-06-07"]', 'class');
+check('가변 기간 변경 후 6/7이 월경일', after7.includes('period'), after7);
+// 다시 5일로 되돌려 이후 테스트에 영향 없도록
+await openDay('2026-06-01');
+await page.fill('#day-period-length', '5');
+await page.dispatchEvent('#day-period-length', 'change');
+await page.click('#day-modal-close');
+
 // 5) 추이 탭: 차트/통계 렌더
 await page.click('.tab[data-tab="trends"]');
 await page.waitForSelector('#tab-trends.active');

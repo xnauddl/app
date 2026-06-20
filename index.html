@@ -71,10 +71,11 @@
             <input type="number" id="cycle-length" min="20" max="40" value="28" />
           </label>
           <label>
-            <span>월경 기간 (일)</span>
+            <span>기본 월경 기간 (일)</span>
             <input type="number" id="period-length" min="2" max="10" value="5" />
           </label>
         </div>
+        <p class="hint">달마다 월경 기간이 다르면, 달력에서 시작일을 누른 뒤 ‘이번 월경 기간’을 따로 정할 수 있어요. 위 값은 새 기록과 예측에 쓰이는 기본값이에요.</p>
         <p class="hint" id="cycle-calc-hint"></p>
       </div>
     </section>
@@ -171,6 +172,12 @@
         <div class="field">
           <label class="field-label">🩸 월경</label>
           <button class="btn period-btn" id="day-period-toggle">이 날을 월경 시작일로 기록</button>
+          <div class="row period-length-row" id="day-period-length-row" hidden>
+            <label class="inline">
+              <span>이번 월경 기간 (일)</span>
+              <input type="number" id="day-period-length" min="1" max="14" />
+            </label>
+          </div>
           <p class="hint" id="day-cycle-info"></p>
         </div>
 
