@@ -220,6 +220,9 @@ input:focus { outline: none; border-color: var(--pink); }
 .btn.small { padding: 8px 12px; font-size: 0.85rem; }
 .btn.period-btn { background: var(--pink-soft); color: var(--pink-dark); width: 100%; }
 .btn.period-btn.active { background: var(--period); color: #fff; }
+.btn.period-end-btn { background: var(--pink-soft); color: var(--pink-dark); width: 100%; margin-top: 8px; }
+.btn.period-end-btn.active { background: var(--period); color: #fff; }
+.btn[hidden] { display: none; }
 .btn.rel-btn { background: #ffe4ec; color: #be185d; width: 100%; }
 .btn.rel-btn.active { background: #e11d48; color: #fff; }
 

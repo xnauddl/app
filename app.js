@@ -182,16 +182,17 @@ function averagePeriodLength() {
   return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 }
 
-// 선택한 날짜가 속한 '기록된 월경'의 시작일(없으면 null).
-// 시작일이 아닌 중간 날을 눌러도 그 월경의 기간을 수정할 수 있게 한다.
-function recordedPeriodStartOf(iso) {
-  const t = fromISO(iso).getTime();
+// 이 날의 종료일을 지정할 수 있는 '기록된 월경'의 시작일(없으면 null).
+// 시작일 당일~14일 이내의 가장 가까운 시작일을 찾는다(현재 기간보다 길게 늘리는 것도 허용).
+function periodOwnerFor(iso) {
+  let best = null;
   for (const s of db.periods) {
-    const start = fromISO(s).getTime();
-    const end = addDays(fromISO(s), periodLengthFor(s)).getTime(); // 끝 경계(미포함)
-    if (t >= start && t < end) return s;
+    if (s <= iso) {
+      const gap = daysBetween(fromISO(s), fromISO(iso)); // 0~
+      if (gap >= 0 && gap <= 13 && (!best || s > best)) best = s;
+    }
   }
-  return null;
+  return best;
 }
 
 /*
@@ -361,8 +362,8 @@ function renderCalendarView() {
 const dayModal = document.getElementById("day-modal");
 const dayWeight = document.getElementById("day-weight");
 const dayPeriodToggle = document.getElementById("day-period-toggle");
-const dayPeriodLengthRow = document.getElementById("day-period-length-row");
-const dayPeriodLength = document.getElementById("day-period-length");
+const dayPeriodEnd = document.getElementById("day-period-end");
+const dayPeriodRange = document.getElementById("day-period-range");
 const dayCycleInfo = document.getElementById("day-cycle-info");
 const dayRelToggle = document.getElementById("day-rel-toggle");
 const dayRelInfo = document.getElementById("day-rel-info");
@@ -447,18 +448,22 @@ function updatePeriodToggle(iso) {
   dayPeriodToggle.classList.toggle("active", isStart);
   dayPeriodToggle.textContent = isStart ? "✓ 월경 시작일로 기록됨 (해제)" : "이 날을 월경 시작일로 기록";
 
-  // 시작일이든 중간 날이든, 이 날이 속한 월경의 기간을 수정할 수 있게 표시
-  const ownerStart = isStart ? iso : recordedPeriodStartOf(iso);
-  editingPeriodStart = ownerStart;
-  dayPeriodLengthRow.hidden = !ownerStart;
-  if (ownerStart) {
-    dayPeriodLength.value = periodLengthFor(ownerStart);
-    const labelSpan = dayPeriodLengthRow.querySelector("span");
-    if (labelSpan) {
-      labelSpan.textContent = isStart
-        ? "이번 월경 기간 (일)"
-        : `이 월경 기간 (${fmtKDate(ownerStart)} 시작) · 일`;
-    }
+  // 이 날을 종료일로 지정할 수 있는 월경이 있으면 종료일 버튼/안내 표시
+  const owner = periodOwnerFor(iso);
+  editingPeriodStart = owner;
+  if (owner) {
+    const len = periodLengthFor(owner);
+    const endISO = toISO(addDays(fromISO(owner), len - 1));
+    const isEnd = iso === endISO;
+    dayPeriodEnd.hidden = false;
+    dayPeriodEnd.classList.toggle("active", isEnd);
+    dayPeriodEnd.textContent = isEnd ? "✓ 이 날이 월경 종료일 (변경하려면 다른 날 선택)" : "이 날을 월경 종료일로 기록";
+    dayPeriodRange.textContent =
+      `이번 월경: ${fmtKDate(owner)} ~ ${fmtKDate(endISO)} (${len}일간)` +
+      (isStart ? " · 끝나는 날을 달력에서 눌러 종료일로 지정하세요" : "");
+  } else {
+    dayPeriodEnd.hidden = true;
+    dayPeriodRange.textContent = "";
   }
 
   const map = buildCycleMap();
@@ -489,13 +494,15 @@ dayPeriodToggle.addEventListener("click", () => {
   renderCalendarView();
 });
 
-/* 이번 월경 기간(일) 입력 — 시작일 또는 중간 날 어디서든 수정 가능 */
-dayPeriodLength.addEventListener("change", () => {
-  if (!editingPeriodStart || !db.periods.includes(editingPeriodStart)) return;
+/* 월경 종료일 선택 — 선택한 날을 그 월경의 마지막 날로 지정(기간 자동 계산) */
+dayPeriodEnd.addEventListener("click", () => {
+  if (!selectedDate || !editingPeriodStart || !db.periods.includes(editingPeriodStart)) return;
   if (!db.periodLengths) db.periodLengths = {};
-  const v = clampInt(dayPeriodLength.value, 1, 14, db.settings.periodLength);
-  db.periodLengths[editingPeriodStart] = v;
-  dayPeriodLength.value = v;
+  const len = clampInt(
+    daysBetween(fromISO(editingPeriodStart), fromISO(selectedDate)) + 1,
+    1, 14, db.settings.periodLength
+  );
+  db.periodLengths[editingPeriodStart] = len;
   saveDB();
   updatePeriodToggle(selectedDate);
   renderCalendarView();

@@ -95,39 +95,35 @@ check('6/1 셀이 월경(period) 표시', periodClass.includes('period'), period
 const fertileClass = await page.getAttribute('.cal-cell[data-date="2026-06-11"]', 'class');
 check('6/11 셀이 가임기(fertile) 표시', fertileClass.includes('fertile'), fertileClass);
 
-// 4-1) 월경별 가변 기간: 6/1 월경을 7일로 변경 → 6/7 이 월경일이 됨(기본 5일이면 아님)
+// 4-1) 종료일 선택으로 기간 설정: 6/7을 종료일로 누르면 6/1 월경이 7일이 됨
 const before7 = await page.getAttribute('.cal-cell[data-date="2026-06-07"]', 'class');
-check('가변 기간 변경 전 6/7은 월경 아님', !before7.includes('period'), before7);
-await openDay('2026-06-01');
-await page.waitForSelector('#day-period-length-row:not([hidden])');
-await page.fill('#day-period-length', '7');
-await page.dispatchEvent('#day-period-length', 'change');
+check('종료일 지정 전 6/7은 월경 아님', !before7.includes('period'), before7);
+await openDay('2026-06-07'); // 6/1 시작 월경의 14일 윈도우 내
+await page.waitForSelector('#day-period-end:not([hidden])');
+await page.click('#day-period-end');
 await page.click('#day-modal-close');
 const plenStored = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).periodLengths['2026-06-01']);
-check('이번 월경 기간 7일 저장', plenStored === 7, `periodLengths[6/1]=${plenStored}`);
+check('종료일 6/7 선택 시 기간 7일 저장', plenStored === 7, `periodLengths[6/1]=${plenStored}`);
 const after7 = await page.getAttribute('.cal-cell[data-date="2026-06-07"]', 'class');
-check('가변 기간 변경 후 6/7이 월경일', after7.includes('period'), after7);
-// 다시 5일로 되돌려 이후 테스트에 영향 없도록
-await openDay('2026-06-01');
-await page.fill('#day-period-length', '5');
-await page.dispatchEvent('#day-period-length', 'change');
-await page.click('#day-modal-close');
+check('종료일 지정 후 6/7이 월경일', after7.includes('period'), after7);
 
-// 4-2) 중간 날(6/3)에서도 그 월경의 기간을 수정할 수 있어야 함
-await openDay('2026-06-03'); // 6/1~6/5 월경의 3일째
-const midRowVisible = await page.locator('#day-period-length-row:not([hidden])').count();
-check('월경 중간 날에서도 기간 입력란 표시', midRowVisible === 1);
-await page.fill('#day-period-length', '6');
-await page.dispatchEvent('#day-period-length', 'change');
+// 4-2) 더 이른 날을 종료일로 누르면 기간이 줄어듦: 6/4을 종료일로 → 4일
+await openDay('2026-06-04');
+await page.waitForSelector('#day-period-end:not([hidden])');
+await page.click('#day-period-end');
 await page.click('#day-modal-close');
-const midEdited = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).periodLengths['2026-06-01']);
-check('중간 날 수정이 시작일(6/1) 기간에 반영', midEdited === 6, `periodLengths[6/1]=${midEdited}`);
-const day6cls = await page.getAttribute('.cal-cell[data-date="2026-06-06"]', 'class');
-check('기간 6일로 늘어 6/6이 월경일', day6cls.includes('period'), day6cls);
-// 원복(5일)
-await openDay('2026-06-03');
-await page.fill('#day-period-length', '5');
-await page.dispatchEvent('#day-period-length', 'change');
+const shortened = await page.evaluate(() => JSON.parse(localStorage.getItem('health-diary-v1')).periodLengths['2026-06-01']);
+check('종료일 6/4 선택 시 기간 4일로 단축', shortened === 4, `periodLengths[6/1]=${shortened}`);
+const day5cls = await page.getAttribute('.cal-cell[data-date="2026-06-05"]', 'class');
+check('기간 4일이면 6/5는 월경 아님', !day5cls.includes('period'), day5cls);
+// 종료일로 지정된 날은 활성 표시
+await openDay('2026-06-04');
+const endActive = await page.getAttribute('#day-period-end', 'class');
+check('종료일로 지정된 날은 종료 버튼 활성', endActive.includes('active'), endActive);
+await page.click('#day-modal-close');
+// 원복(5일): 6/5을 종료일로
+await openDay('2026-06-05');
+await page.click('#day-period-end');
 await page.click('#day-modal-close');
 
 // 5) 추이 탭: 차트/통계 렌더
