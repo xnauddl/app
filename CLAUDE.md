@@ -35,7 +35,7 @@ The entire application logic is one file, `app.js` (~970 lines), with no modules
 
 - **Cycle-length auto vs. manual:** with ≥2 recorded starts, `averageCycle()` auto-updates `settings.cycleLength`. Once the user edits the cycle field directly, `settings.cycleManual` latches true and auto-averaging stops overwriting it. Preserve this flag's semantics when touching settings.
 
-- **Two UI surfaces, one render pipeline:** the three tabs (calendar / trends / settings) and a shared day-detail modal. `initAll()` is the full re-render entry point (also called after a backup restore). `renderCalendarView()` redraws calendar + prediction + notification state together. Trends and settings tabs re-render lazily on tab activation. The weight chart is hand-built SVG (polyline/area/dots) in `renderWeightChart()` — there is no charting library.
+- **Two UI surfaces, one render pipeline:** the three tabs (calendar / trends / settings) and a shared day-detail modal. `initAll()` is the full re-render entry point (called once at startup and after a backup restore) — it renders all tabs, including trends and settings. `renderCalendarView()` redraws calendar + prediction + notification state together. The trends and settings tabs are also re-rendered on tab activation so they reflect the latest data. The weight chart is hand-built SVG (polyline/area/dots) in `renderWeightChart()` — there is no charting library.
 
 - **Modal accessibility is intentional:** the day modal implements a focus trap, Escape-to-close, and focus restoration to the originating calendar cell. Preserve these when editing modal markup/handlers.
 
